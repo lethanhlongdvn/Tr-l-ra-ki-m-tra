@@ -1,0 +1,334 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Xuất KHBD Có Tích Hợp Tự Động (Chuẩn CV 2345) - Thư Viện Giáo Viên Tiểu Học</title>
+  
+  <!-- SEO & Social Meta -->
+  <meta name="description" content="Xuất Kế hoạch bài dạy (KHBD) Có Tích Hợp Tự Động chuẩn Công văn 2345/BGDĐT-GDTH cho 5 khối lớp Tiểu học. Tích hợp chuyên đề, dạy học phân hóa cho học sinh khuyết tật, hỗ trợ TKB GVCN và GV Bộ Môn.">
+  <meta name="author" content="Thầy Lê Thành Long">
+  <link rel="canonical" href="https://thuviengiaoanbaigiang.netlify.app/ai-integration.html">
+  <meta property="og:type" content="website">
+  <meta property="og:locale" content="vi_VN">
+  <meta property="og:site_name" content="Thư Viện Bài Giảng & KHBD Tiểu Học">
+  <meta property="og:url" content="https://thuviengiaoanbaigiang.netlify.app/ai-integration.html">
+  <meta property="og:title" content="Xuất KHBD Có Tích Hợp Tự Động (Chuẩn CV 2345) - Thầy Lê Thành Long">
+  <meta property="og:description" content="Xuất Kế hoạch bài dạy (KHBD) Có Tích Hợp Tự Động chuẩn Công văn 2345 cho 5 khối lớp Tiểu học. Tự động liên kết TKB, phân hóa học sinh khuyết tật và tích hợp STEM, GD Địa phương.">
+  
+  <!-- Google Fonts: Be Vietnam Pro & Nunito -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@400;500;600;700;800&family=Nunito:wght@700;800&display=swap" rel="stylesheet">
+  
+  <!-- Preconnect CDN -->
+  <link rel="preconnect" href="https://cdnjs.cloudflare.com" crossorigin>
+  <link rel="dns-prefetch" href="https://cdnjs.cloudflare.com">
+
+  <!-- FontAwesome Icons 6 -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+  
+  <!-- Main CSS -->
+  <link rel="stylesheet" href="css/style.css">
+
+  <style>
+    /* BỐ CỤC TOÀN MÀN HÌNH RỘNG RÃI & HIỆN ĐẠI */
+    body {
+      background-color: #f1f5f9;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      font-family: 'Be Vietnam Pro', -apple-system, BlinkMacSystemFont, sans-serif;
+      color: #0f172a;
+      margin: 0;
+      padding: 0;
+    }
+
+    .standalone-header {
+      background: linear-gradient(135deg, #1e3a8a 0%, #0f172a 100%);
+      color: #ffffff;
+      padding: 0.75rem 2rem;
+      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
+      position: sticky;
+      top: 0;
+      z-index: 1000;
+    }
+
+    .standalone-header-inner {
+      max-width: 1720px;
+      margin: 0 auto;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 1rem;
+      flex-wrap: wrap;
+    }
+
+    .standalone-brand {
+      display: flex;
+      align-items: center;
+      gap: 0.85rem;
+      text-decoration: none;
+      color: #ffffff;
+    }
+
+    .standalone-brand-icon {
+      width: 44px;
+      height: 44px;
+      border-radius: 12px;
+      background: linear-gradient(135deg, #db2777, #ec4899);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.35rem;
+      color: #ffffff;
+      box-shadow: 0 4px 12px rgba(219, 39, 119, 0.4);
+    }
+
+    .standalone-brand-title {
+      font-size: 1.05rem;
+      font-weight: 800;
+      font-family: 'Nunito', sans-serif;
+      letter-spacing: 0.02em;
+      margin: 0;
+    }
+
+    .standalone-brand-subtitle {
+      font-size: 0.76rem;
+      color: #93c5fd;
+      margin: 0;
+    }
+
+    .standalone-actions {
+      display: flex;
+      align-items: center;
+      gap: 0.65rem;
+    }
+
+    .standalone-main {
+      flex: 1;
+      max-width: 1720px;
+      width: 100%;
+      margin: 1.25rem auto;
+      padding: 0 1.5rem 2.5rem 1.5rem;
+      box-sizing: border-box;
+    }
+
+    /* BỐ CỤC LƯỚI KHÔNG GIAN RỘNG */
+    .ai-layout-container {
+      display: grid !important;
+      grid-template-columns: 420px minmax(0, 1fr) !important;
+      gap: 1.5rem !important;
+      align-items: start !important;
+      max-width: 100% !important;
+    }
+
+    #integOutputContainer {
+      min-width: 0 !important;
+      max-width: 100% !important;
+      overflow-x: hidden !important;
+      box-sizing: border-box !important;
+    }
+
+    .integrated-doc-sheet {
+      max-width: 100% !important;
+      box-sizing: border-box !important;
+      overflow-x: auto !important;
+    }
+
+    @media (max-width: 1180px) {
+      .ai-layout-container {
+        grid-template-columns: 1fr !important;
+      }
+    }
+
+    /* STYLE CHO KHU VỰC TẢI TÀI LIỆU & GÓP Ý AI */
+    .upload-dropzone {
+      border: 2px dashed #cbd5e1;
+      border-radius: var(--radius-sm);
+      background: #f8fafc;
+      padding: 1.25rem 1rem;
+      text-align: center;
+      cursor: pointer;
+      transition: all 0.2s ease;
+    }
+    .upload-dropzone:hover, .upload-dropzone.dragover {
+      border-color: #db2777;
+      background: #fdf2f8;
+    }
+    .upload-tab-btn {
+      flex: 1;
+      padding: 0.45rem 0.5rem;
+      font-size: 0.78rem;
+      font-weight: 700;
+      border: 1px solid #cbd5e1;
+      background: #f8fafc;
+      border-radius: var(--radius-sm);
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+    .upload-tab-btn.active {
+      background: #db2777;
+      color: #ffffff;
+      border-color: #db2777;
+    }
+    .ai-feedback-box {
+      background: linear-gradient(135deg, #fdf2f8 0%, #f3e8ff 100%);
+      border: 1px solid #f0abfc;
+      border-radius: var(--radius-md);
+      padding: 1rem 1.25rem;
+      margin-top: 1rem;
+    }
+    .editable-plan-input {
+      width: 100%;
+      border: 1px solid #cbd5e1;
+      border-radius: 4px;
+      padding: 0.35rem 0.5rem;
+      font-size: 0.8rem;
+      font-family: inherit;
+      background: #ffffff;
+      transition: border 0.2s;
+    }
+    .editable-plan-input:focus {
+      border-color: #db2777;
+      outline: none;
+      box-shadow: 0 0 0 2px rgba(219, 39, 119, 0.15);
+    }
+    .stepper-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 1.25rem;
+      background: #ffffff;
+      border: 1px solid var(--border-color);
+      border-radius: var(--radius-md);
+      padding: 0.75rem 1.5rem;
+      box-shadow: var(--shadow-sm);
+    }
+    .step-item {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      font-size: 0.84rem;
+      font-weight: 700;
+      color: #94a3b8;
+    }
+    .step-item.active {
+      color: #db2777;
+    }
+    .step-item.completed {
+      color: #16a34a;
+    }
+    .step-number {
+      width: 26px;
+      height: 26px;
+      border-radius: 50%;
+      background: #e2e8f0;
+      color: #64748b;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 0.75rem;
+      font-weight: 800;
+    }
+    .step-item.active .step-number {
+      background: #db2777;
+      color: #ffffff;
+    }
+    .step-item.completed .step-number {
+      background: #16a34a;
+      color: #ffffff;
+    }
+    .step-line {
+      flex: 1;
+      height: 2px;
+      background: #e2e8f0;
+      margin: 0 1rem;
+    }
+    .step-line.active {
+      background: #16a34a;
+    }
+  </style>
+</head>
+<body class="page-ai-integration">
+
+  <!-- HEADER TOÀN MÀN HÌNH -->
+  <header class="standalone-header">
+    <div class="standalone-header-inner">
+      <a href="index.html" class="standalone-brand">
+        <div class="standalone-brand-icon">
+          <i class="fa-solid fa-layer-group"></i>
+        </div>
+        <div>
+          <h1 class="standalone-brand-title">XUẤT KẾ HOẠCH BÀI DẠY (KHBD) CÓ TÍCH HỢP</h1>
+          <p class="standalone-brand-subtitle">Tích hợp chuyên đề • Phân hóa HS khuyết tật • Theo TKB GVCN & GV Bộ Môn • Chuẩn CV 2345</p>
+        </div>
+      </a>
+
+      <div class="standalone-actions">
+        <a href="ai-exam.html" class="btn btn-outline" style="color: #ffffff; border-color: rgba(255,255,255,0.4); font-size: 0.82rem;" title="Mở Trợ Lý AI Ra Đề & Ma Trận trong tab riêng">
+          <i class="fa-solid fa-brain" style="color: #c084fc;"></i>
+          <span>Trợ Lý AI Ra Đề (TT 27)</span>
+        </a>
+        <a href="index.html" class="btn btn-primary" style="background: #ffffff; color: var(--primary); font-weight: 700; font-size: 0.82rem; box-shadow: 0 4px 12px rgba(0,0,0,0.15);">
+          <i class="fa-solid fa-house"></i>
+          <span>Về Thư Viện Chính</span>
+        </a>
+      </div>
+    </div>
+  </header>
+
+  <!-- NỘI DUNG CHÍNH RỘNG RÃI -->
+  <main class="standalone-main">
+    <div id="content-container">
+      <!-- Render động bởi renderAiIntegrationView trong app.js -->
+    </div>
+  </main>
+
+  <!-- FOOTER -->
+  <footer class="standalone-footer">
+    <div>
+      <i class="fa-solid fa-award" style="color: #f59e0b;"></i> Chuẩn Chương trình GDPT 2018 & Công văn 2345/BGDĐT-GDTH • Thư Viện Giáo Viên Tiểu Học (Thầy Lê Thành Long)
+    </div>
+  </footer>
+
+  <!-- Vùng chứa thông báo Toast -->
+  <div class="toast-container" id="toast-container"></div>
+
+  <!-- Thư viện Đọc tài liệu phía Trình duyệt (Mammoth & PDF.js) -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/mammoth/1.6.0/mammoth.browser.min.js" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js" defer></script>
+
+  <!-- Kho Kế Hoạch Bài Dạy (KHBD) Số Hóa Chuẩn 100% CV 2345 (Tất cả có thuộc tính defer tải song song không chặn màn hình) -->
+  <!-- Kho Kế Hoạch Bài Dạy (KHBD) - Registry & Lazy Loading -->
+  <!-- Các file KHBD số hóa (lop1-5) được nạp tự động khi GV chọn Khối/Môn -->
+  <!-- thông qua IntegrationService.ensureSubjectLoaded() — không cần nhúng cứng -->
+  <script src="js/khbd_sohoa/khbd-registry.js" defer></script>
+
+  <!-- Dịch vụ Tích hợp & Core Scripts -->
+  <script src="js/lib/jszip.min.js" defer></script>
+  <script src="js/academic-calendar.js?v=20260924_v2" defer></script>
+  <script src="js/integration-service.js?v=20260924_v2" defer></script>
+  <script src="js/config.js?v=20260924_v2" defer></script>
+  <script src="js/auth.js?v=20260924_v2" defer></script>
+  <script src="js/drive-service.js?v=20260924_v2" defer></script>
+  <script src="js/ai-service.js?v=20260924_v2" defer></script>
+  <script src="js/toolkit.js?v=20260924_v2" defer></script>
+  <script src="js/app.js?v=20260924_v2" defer></script>
+  <script src="js/views/ai-integration-view.js?v=20260924_v2" defer></script>
+
+  <script>
+    function ensureIntegrationRendered() {
+      var container = document.getElementById("content-container");
+      if (container && container.children.length === 0 && typeof renderAiIntegrationView === "function") {
+        renderAiIntegrationView(container);
+      }
+    }
+    window.addEventListener("load", ensureIntegrationRendered);
+    document.addEventListener("DOMContentLoaded", ensureIntegrationRendered);
+    setTimeout(ensureIntegrationRendered, 50);
+    setTimeout(ensureIntegrationRendered, 250);
+  </script>
+</body>
+</html>

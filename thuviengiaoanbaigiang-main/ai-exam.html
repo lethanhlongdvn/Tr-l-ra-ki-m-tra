@@ -1,0 +1,227 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Trợ Lý AI Ra Đề & Ma Trận Chuẩn TT 27 - Thư Viện Giáo Viên Tiểu Học</title>
+  
+  <!-- SEO & Social Meta -->
+  <meta name="description" content="Trợ lý AI Soạn Đề Kiểm Tra & Ma Trận Chuẩn Thông tư 27/2020/TT-BGDĐT. Bám sát SGK Kết nối tri thức với cuộc sống.">
+  <meta name="author" content="Thầy Lê Thành Long">
+  <link rel="canonical" href="https://thuviengiaoanbaigiang.netlify.app/ai-exam.html">
+  <meta property="og:type" content="website">
+  <meta property="og:locale" content="vi_VN">
+  <meta property="og:site_name" content="Thư Viện Bài Giảng & KHBD Tiểu Học">
+  <meta property="og:url" content="https://thuviengiaoanbaigiang.netlify.app/ai-exam.html">
+  <meta property="og:title" content="Trợ Lý AI Ra Đề & Ma Trận Chuẩn TT 27 - Thầy Lê Thành Long">
+  <meta property="og:description" content="Trợ lý AI Soạn Đề Kiểm Tra & Ma Trận Chuẩn Thông tư 27/2020/TT-BGDĐT. Tự động thiết lập ma trận 3 mức độ, khung đọc hiểu SEA-PLM và xuất file Word.">
+  
+  <!-- Google Fonts: Be Vietnam Pro & Nunito -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@400;500;600;700;800&family=Nunito:wght@700;800&display=swap" rel="stylesheet">
+  
+  <!-- Preconnect CDN -->
+  <link rel="preconnect" href="https://cdnjs.cloudflare.com" crossorigin>
+  <link rel="dns-prefetch" href="https://cdnjs.cloudflare.com">
+
+  <!-- FontAwesome Icons 6 -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+  
+  <!-- Main CSS -->
+  <link rel="stylesheet" href="css/style.css">
+
+  <style>
+    /* BỐ CỤC TOÀN MÀN HÌNH RỘNG RÃI & HIỆN ĐẠI */
+    body {
+      background-color: #f1f5f9;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      font-family: 'Be Vietnam Pro', -apple-system, BlinkMacSystemFont, sans-serif;
+      color: #0f172a;
+      margin: 0;
+      padding: 0;
+    }
+
+    .standalone-header {
+      background: linear-gradient(135deg, #1e3a8a 0%, #0f172a 100%);
+      color: #ffffff;
+      padding: 0.75rem 2rem;
+      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
+      position: sticky;
+      top: 0;
+      z-index: 1000;
+    }
+
+    .standalone-header-inner {
+      max-width: 1720px;
+      margin: 0 auto;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 1rem;
+      flex-wrap: wrap;
+    }
+
+    .standalone-brand {
+      display: flex;
+      align-items: center;
+      gap: 0.85rem;
+      text-decoration: none;
+      color: #ffffff;
+    }
+
+    .standalone-brand-icon {
+      width: 44px;
+      height: 44px;
+      border-radius: 12px;
+      background: linear-gradient(135deg, #7c3aed, #a855f7);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.35rem;
+      color: #ffffff;
+      box-shadow: 0 4px 12px rgba(124, 58, 237, 0.4);
+    }
+
+    .standalone-brand-title {
+      font-size: 1.05rem;
+      font-weight: 800;
+      font-family: 'Nunito', sans-serif;
+      letter-spacing: 0.02em;
+      margin: 0;
+    }
+
+    .standalone-brand-subtitle {
+      font-size: 0.76rem;
+      color: #93c5fd;
+      margin: 0;
+    }
+
+    .standalone-actions {
+      display: flex;
+      align-items: center;
+      gap: 0.65rem;
+    }
+
+    .standalone-main {
+      flex: 1;
+      max-width: 1720px;
+      width: 100%;
+      margin: 1.25rem auto;
+      padding: 0 1.5rem 2.5rem 1.5rem;
+      box-sizing: border-box;
+    }
+
+    /* BỐ CỤC LƯỚI KHÔNG GIAN RỘNG */
+    .ai-layout-container {
+      display: grid !important;
+      grid-template-columns: 420px 1fr !important;
+      gap: 1.5rem !important;
+      align-items: start !important;
+    }
+
+    @media (max-width: 1180px) {
+      .ai-layout-container {
+        grid-template-columns: 1fr !important;
+      }
+    }
+
+    .paper-preview-card {
+      background: #ffffff !important;
+      border: 1px solid #cbd5e1 !important;
+      border-radius: var(--radius-md) !important;
+      padding: 2rem 2.5rem !important;
+      box-shadow: 0 4px 25px rgba(0,0,0,0.06) !important;
+      min-height: 650px !important;
+    }
+
+    .standalone-footer {
+      background: #ffffff;
+      border-top: 1px solid var(--border-color);
+      padding: 1rem 2rem;
+      text-align: center;
+      font-size: 0.82rem;
+      color: var(--text-muted);
+      margin-top: auto;
+    }
+  </style>
+</head>
+<body class="page-ai-exam">
+
+  <!-- HEADER TOÀN MÀN HÌNH -->
+  <header class="standalone-header">
+    <div class="standalone-header-inner">
+      <a href="index.html" class="standalone-brand">
+        <div class="standalone-brand-icon">
+          <i class="fa-solid fa-wand-magic-sparkles"></i>
+        </div>
+        <div>
+          <h1 class="standalone-brand-title">TRỢ LÝ AI SOẠN ĐỀ KIỂM TRA & MA TRẬN</h1>
+          <p class="standalone-brand-subtitle">Chuẩn Thông tư 27/2020/TT-BGDĐT • Đa Bộ Sách (Kết Nối Tri Thức & Chân Trời Sáng Tạo) • Khung Đọc Hiểu SEA-PLM</p>
+        </div>
+      </a>
+
+      <div class="standalone-actions">
+        <a href="ai-integration.html" class="btn btn-outline" style="color: #ffffff; border-color: rgba(255,255,255,0.4); font-size: 0.82rem;" title="Mở Trợ Lý AI Tích Hợp Giáo Án trong tab riêng">
+          <i class="fa-solid fa-layer-group" style="color: #ec4899;"></i>
+          <span>AI Tích Hợp Giáo Án (CV 2345)</span>
+        </a>
+        <a href="index.html" class="btn btn-primary" style="background: #ffffff; color: var(--primary); font-weight: 700; font-size: 0.82rem; box-shadow: 0 4px 12px rgba(0,0,0,0.15);">
+          <i class="fa-solid fa-house"></i>
+          <span>Về Thư Viện Chính</span>
+        </a>
+      </div>
+    </div>
+  </header>
+
+  <!-- NỘI DUNG CHÍNH RỘNG RÃI -->
+  <main class="standalone-main">
+    <div id="content-container">
+      <!-- Render động bởi renderAiExamView trong app.js -->
+    </div>
+  </main>
+
+  <!-- FOOTER -->
+  <footer class="standalone-footer">
+    <div>
+      <i class="fa-solid fa-award" style="color: #f59e0b;"></i> Chuẩn Chương trình GDPT 2018 & Thông tư 27/2020/TT-BGDĐT • Thư Viện Giáo Viên Tiểu Học (Thầy Lê Thành Long)
+    </div>
+  </footer>
+
+  <!-- Vùng chứa thông báo Toast -->
+  <div class="toast-container" id="toast-container"></div>
+
+  <!-- Kho Sách Giáo Khoa Số Hóa KNTT - Khối 5 -->
+  <script src="js/sgk/sgk-registry.js" defer></script>
+  <!-- Khung Đọc Hiểu & Viết SEA-PLM + Ngữ Liệu Địa Phương Vĩnh Long Mới -->
+  <script src="js/sgk/seaplm-reading-framework.js" defer></script>
+  <!-- Kho Sách Giáo Khoa Số Hóa (Tự động tải theo môn/khối - Lazy Loading) -->
+
+  <!-- Thư viện nén OpenXML JSZip -->
+  <script src="js/lib/jszip.min.js" defer></script>
+
+  <!-- Scripts Logic & Exam View Module (không cần data.js, integration-service, academic-calendar) -->
+  <script src="js/config.js?v=20260924_v2" defer></script>
+  <script src="js/auth.js?v=20260924_v2" defer></script>
+  <script src="js/drive-service.js?v=20260924_v2" defer></script>
+  <script src="js/ai-service.js?v=20260924_v2" defer></script>
+  <script src="js/toolkit.js?v=20260924_v2" defer></script>
+  <script src="js/app.js?v=20260924_v2" defer></script>
+  <script src="js/views/ai-exam-view.js?v=20260924_v2" defer></script>
+
+  <script>
+    function ensureExamRendered() {
+      var container = document.getElementById("content-container");
+      if (container && container.children.length === 0 && typeof renderAiExamView === "function") {
+        renderAiExamView(container);
+      }
+    }
+    window.addEventListener("load", ensureExamRendered);
+    document.addEventListener("DOMContentLoaded", ensureExamRendered);
+    setTimeout(ensureExamRendered, 50);
+    setTimeout(ensureExamRendered, 250);
+  </script>
+</body>
+</html>

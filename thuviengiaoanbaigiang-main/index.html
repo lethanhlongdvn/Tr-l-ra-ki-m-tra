@@ -1,0 +1,513 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Thư Viện Bài Giảng Điện Tử & Giáo Án (KHBD) Tiểu Học Lớp 1-5 Miễn Phí</title>
+  
+  <!-- SEO Meta Tags -->
+  <meta name="description" content="Kho học liệu số giáo viên Tiểu học: Giáo án, Kế hoạch bài dạy (KHBD), Bài giảng điện tử PowerPoint lớp 1, 2, 3, 4, 5 (Cánh Diều, Kết Nối Tri Thức, Chân Trời Sáng Tạo). Tải miễn phí bản Word & PowerPoint. Tích hợp Trợ Lý AI Ra Đề.">
+  <meta name="keywords" content="thư viện giáo án, giáo án tiểu học, kế hoạch bài dạy, bài giảng powerpoint, giáo án cánh diều, giáo án kết nối tri thức, giáo án chân trời sáng tạo, giáo án lớp 1 2 3 4 5, trợ lý ai ra đề, đề thi tiểu học, thầy lê thành long">
+  <meta name="robots" content="index, follow">
+  <meta name="author" content="Thầy Lê Thành Long">
+  <link rel="canonical" href="https://thuviengiaoanbaigiang.netlify.app/">
+
+  <!-- Open Graph / Facebook / Zalo Share -->
+  <meta property="og:type" content="website">
+  <meta property="og:url" content="https://thuviengiaoanbaigiang.netlify.app/">
+  <meta property="og:title" content="Thư Viện Bài Giảng Điện Tử & Giáo Án (KHBD) Tiểu Học Lớp 1-5">
+  <meta property="og:description" content="Tải miễn phí kho bài giảng PowerPoint và Kế hoạch bài dạy bản Word chuẩn CT 2018 (Cánh Diều, Kết Nối Tri Thức, Chân Trời Sáng Tạo).">
+  
+  <!-- Google Fonts: Be Vietnam Pro -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@400;600;700;800&family=Nunito:wght@700;800&display=swap" rel="stylesheet">
+  
+  <!-- FontAwesome Icons 6 -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+  
+  <!-- CSS Giao diện chuẩn phong cách Thư Viện Giáo Viên -->
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+
+  <!-- ==========================================
+       THANH ĐẦU TRANG TRANG TRỌNG (FORMAL HEADER)
+       ========================================== -->
+  <header class="main-header">
+    <div class="header-container">
+      <!-- Logo & Tên thư viện -->
+      <a href="#home" class="header-logo" onclick="navigateTo('home')">
+        <div class="logo-icon">
+          <i class="fa-solid fa-graduation-cap"></i>
+        </div>
+        <div class="logo-text">
+          <h1>THƯ VIỆN BÀI GIẢNG & KHBD TIỂU HỌC</h1>
+          <p>Kho Học Liệu Số Giáo Viên Tiểu Học</p>
+        </div>
+      </a>
+
+      <!-- Khẩu hiệu giáo dục in vàng kim nổi bật -->
+      <div class="header-slogan-box">
+        <div class="header-slogan-text">
+          <i class="fa-solid fa-quote-left"></i>
+          <span>Gieo chữ – Trồng người – Thắp sáng tương lai</span>
+          <i class="fa-solid fa-quote-right"></i>
+        </div>
+      </div>
+
+      <!-- Nút AI nhanh & Menu Toggle Mobile -->
+      <div class="header-actions-box">
+        <button class="btn btn-ai-header" id="btn-header-ai-integration" onclick="window.open('ai-integration.html', '_blank')" style="background: linear-gradient(135deg, #db2777, #ec4899); border: none; margin-right: 0.35rem; box-shadow: 0 4px 12px rgba(219, 39, 119, 0.35);" title="Mở Xuất KHBD Có Tích Hợp trong tab mới">
+          <i class="fa-solid fa-layer-group"></i>
+          <span>Xuất KHBD Có Tích Hợp</span>
+          <span style="background: #ef4444; color: white; font-size: 0.62rem; padding: 2px 6px; border-radius: 9999px; margin-left: 4px; font-weight: 800; animation: pulse 1.5s infinite;">MỚI</span>
+          <i class="fa-solid fa-arrow-up-right-from-square" style="font-size: 0.65rem; margin-left: 4px; opacity: 0.85;"></i>
+        </button>
+        <button class="btn btn-ai-header" id="btn-header-ai" onclick="window.open('ai-exam.html', '_blank')" title="Mở Trợ Lý AI Ra Đề trong tab mới rộng rãi">
+          <i class="fa-solid fa-wand-magic-sparkles"></i>
+          <span>Trợ Lý AI Ra Đề</span>
+          <i class="fa-solid fa-arrow-up-right-from-square" style="font-size: 0.65rem; margin-left: 4px; opacity: 0.85;"></i>
+        </button>
+        <button class="mobile-toggle-btn" id="mobile-toggle-btn" aria-label="Mở menu">
+          <i class="fa-solid fa-bars"></i>
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <!-- ==========================================
+       BỐ CỤC CHÍNH (SIDEBAR & MAIN AREA)
+       ========================================== -->
+  <div class="app-layout">
+    <!-- Cột bên trái: Danh mục phân cấp theo Khối & Môn học -->
+    <aside class="app-sidebar" id="app-sidebar">
+      <nav aria-label="Danh mục chính">
+      <div class="sidebar-section-title">HỆ THỐNG DANH MỤC</div>
+      <ul class="tree-menu">
+        <li class="tree-item active" data-view="home" id="nav-home">
+          <div class="tree-row" onclick="navigateTo('home')">
+            <a href="javascript:void(0)">
+              <i class="fa-solid fa-house"></i>
+              <span>Trang Chủ</span>
+            </a>
+          </div>
+        </li>
+
+        <div class="sidebar-section-title" style="margin-top: 0.75rem;">DANH MỤC TÀI LIỆU</div>
+        <div id="sidebar-docs-nav"></div>
+
+        <li class="tree-item" data-view="ai-integration" id="nav-ai-integration">
+          <div class="tree-row" onclick="window.open('ai-integration.html', '_blank')" style="cursor: pointer;" title="Mở Xuất KHBD Có Tích Hợp trong tab mới">
+            <a href="ai-integration.html" target="_blank" onclick="event.preventDefault(); window.open('ai-integration.html', '_blank');">
+              <i class="fa-solid fa-layer-group" style="color: #ec4899;"></i>
+              <span style="font-size: 0.84rem; font-weight: 600;">Xuất KHBD Có Tích Hợp</span>
+            </a>
+            <span class="tree-badge" style="background: linear-gradient(135deg, #ec4899, #f43f5e); color: white; font-weight: 800; font-size: 0.62rem; padding: 0.15rem 0.4rem; display: flex; align-items: center; gap: 3px; flex-shrink: 0;">
+              CV 2345 <i class="fa-solid fa-arrow-up-right-from-square" style="font-size: 0.58rem;"></i>
+            </span>
+          </div>
+        </li>
+
+        <li class="tree-item" data-view="ai-exam" id="nav-ai-exam">
+          <div class="tree-row" onclick="window.open('ai-exam.html', '_blank')" style="cursor: pointer;" title="Mở Trợ lý AI Ra đề & Ma trận trong tab mới">
+            <a href="ai-exam.html" target="_blank" onclick="event.preventDefault(); window.open('ai-exam.html', '_blank');">
+              <i class="fa-solid fa-brain" style="color: #c084fc;"></i>
+              <span style="font-size: 0.84rem; font-weight: 600;">AI Ra Đề & Ma Trận</span>
+            </a>
+            <span class="tree-badge" style="background: linear-gradient(135deg, #7c3aed, #a855f7); color: white; font-weight: 800; font-size: 0.62rem; padding: 0.15rem 0.4rem; display: flex; align-items: center; gap: 3px; flex-shrink: 0;">
+              TT 27 <i class="fa-solid fa-arrow-up-right-from-square" style="font-size: 0.58rem;"></i>
+            </span>
+          </div>
+        </li>
+
+        <li class="tree-item" data-view="toolkit" id="nav-toolkit">
+          <div class="tree-row" onclick="navigateTo('toolkit')">
+            <a href="javascript:void(0)">
+              <i class="fa-solid fa-shapes" style="color: #34d399;"></i>
+              <span>Tiện Ích Giảng Dạy</span>
+            </a>
+          </div>
+        </li>
+
+        <div class="sidebar-section-title" style="margin-top: 0.75rem;">HỆ THỐNG</div>
+        <li class="tree-item" data-view="settings" id="nav-settings" style="display:none;">
+          <div class="tree-row" onclick="navigateTo('settings')">
+            <a href="javascript:void(0)">
+              <i class="fa-solid fa-sliders" style="color: #94a3b8;"></i>
+              <span>Cấu Hình & Quản Trị</span>
+            </a>
+          </div>
+        </li>
+      </ul>
+      </nav>
+
+      <!-- Footer Sidebar: Quyền truy cập người dùng -->
+      <div class="sidebar-footer">
+        <div class="user-role-card">
+          <div class="role-title">Quyền truy cập của bạn:</div>
+          <div class="role-control-wrap" id="user-role-box">
+            <!-- Render động bởi auth.js -->
+          </div>
+        </div>
+      </div>
+    </aside>
+
+    <!-- Khu vực nội dung chính -->
+    <main class="app-main">
+      <!-- Thanh điều hướng Breadcrumbs & Quick Filters -->
+      <div class="navigation-bar">
+        <ul class="breadcrumbs" id="breadcrumbs-container">
+          <li><a href="javascript:void(0)" onclick="navigateTo('home')"><i class="fa-solid fa-house"></i> Trang Chủ</a></li>
+        </ul>
+
+
+
+      </div>
+
+      <!-- Thanh tìm kiếm & Hành động (Main Action Bar) -->
+      <div class="main-action-bar">
+        <div class="main-search-wrap">
+          <div class="search-input-wrap">
+            <i class="fa-solid fa-magnifying-glass"></i>
+            <input type="search" id="search-input" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" name="query_search_text" placeholder="Tìm giáo án, slide, đề thi...">
+            <button class="search-clear-btn" id="searchClearBtn" style="display: none;" aria-label="Xóa tìm kiếm"><i class="fa-solid fa-xmark"></i></button>
+          </div>
+        </div>
+
+        <div class="main-action-buttons">
+          <button class="btn btn-outline" id="btn-refresh-data" onclick="syncDriveData(true)" title="Đồng bộ lại từ Google Drive">
+            <i class="fa-solid fa-rotate-right"></i> <span>Đồng bộ Drive</span>
+          </button>
+          <button class="btn btn-primary" onclick="navigateTo('ai-exam')">
+            <i class="fa-solid fa-wand-magic-sparkles"></i>
+            <span>Soạn Đề AI</span>
+          </button>
+        </div>
+      </div>
+
+      <!-- Khung chứa động các View -->
+      <div id="content-container" class="content-viewport">
+        <!-- Render bởi app.js -->
+      </div>
+
+      <!-- Chân trang trang trọng (Formal Footer) -->
+      <footer class="app-footer">
+        <div class="footer-card">
+          <div class="footer-info-row">
+            <span><i class="fa-solid fa-cloud-arrow-up" style="color: #38bdf8;"></i> Đã kết nối Google Drive (<span id="footer-file-count">...</span> Tệp tin)</span>
+            <span class="dot-sep">•</span>
+            <span><i class="fa-solid fa-award" style="color: #facc15;"></i> Chuẩn Chương trình GDPT 2018</span>
+            <span class="dot-sep">•</span>
+            <span><i class="fa-regular fa-copyright"></i> 2026 Thư Viện Giáo Viên Tiểu Học</span>
+          </div>
+        </div>
+      </footer>
+    </main>
+  </div>
+
+  <!-- ==========================================
+       MODAL 1: XEM TRƯỚC TÀI LIỆU (PREVIEW MODAL)
+       ========================================== -->
+  <div class="modal" id="preview-modal">
+    <div class="modal-backdrop" onclick="DriveService.closeViewer()"></div>
+    <div class="modal-content modal-content-lg">
+      <div class="modal-header">
+        <div style="flex: 1; min-width: 0; margin-right: 1rem;">
+          <h3 id="preview-modal-title" style="white-space: nowrap; overflow: hidden; text-overflow: ellipsis; margin-bottom: 0.25rem;">
+            <i class="fa-solid fa-file-word" style="color: var(--color-word);"></i> Xem trước tài liệu
+          </h3>
+          <div id="preview-meta-info" style="font-size: 0.82rem; color: var(--text-muted);">
+            Thư mục: THU_VIEN • Người đóng góp: Thầy Lê Thành Long
+          </div>
+        </div>
+        <div style="display: flex; align-items: center; gap: 0.5rem; flex-shrink: 0;">
+          <button id="btn-fullscreen-toggle" class="btn btn-outline" style="padding: 0.4rem 0.75rem; font-size: 0.8rem;" title="Trình chiếu toàn màn hình">
+            <i class="fa-solid fa-expand"></i> Trình chiếu
+          </button>
+          <button id="btn-copy-drive" class="btn btn-outline" style="padding: 0.4rem 0.75rem; font-size: 0.8rem;" title="Tạo bản sao vào Google Drive">
+            <i class="fa-brands fa-google-drive" style="color: #16a34a;"></i> Lưu Drive
+          </button>
+          <a id="preview-download-btn" href="#" target="_blank" class="btn btn-primary" style="padding: 0.4rem 0.85rem; font-size: 0.82rem;">
+            <i class="fa-solid fa-download"></i> Tải về máy
+          </a>
+          <button class="modal-close" onclick="DriveService.closeViewer()"><i class="fa-solid fa-xmark"></i></button>
+        </div>
+      </div>
+      <div class="modal-body preview-body" id="preview-body-container" style="position: relative;">
+        <div class="viewer-loading" id="viewerLoading">
+          <div class="spinner"></div>
+          <p>Đang tải tài liệu từ kho Google Drive...</p>
+        </div>
+        <!-- Lớp khiên chặn hoàn toàn nút Pop-out [↗] mở ngoài của Google -->
+        <div class="iframe-corner-shield" id="iframeCornerShield" onclick="handleIframeCornerClick()" title="Bảo vệ bản quyền"></div>
+        <iframe id="preview-iframe" src="" sandbox="allow-scripts allow-same-origin allow-forms" allow="autoplay; fullscreen"></iframe>
+      </div>
+    </div>
+  </div>
+
+  <!-- ==========================================
+       MODAL 1.5: NẠP TIỀN / QUÉT QR MỞ KHÓA TỰ ĐỘNG
+       ========================================== -->
+  <div class="modal" id="payment-modal">
+    <div class="modal-backdrop" onclick="closePaymentModal()"></div>
+    <div class="modal-content" style="max-width: 500px;">
+      <div class="modal-header">
+        <h3><i class="fa-solid fa-qrcode" style="color: #ea580c;"></i> Mở Khóa Tải Toàn Bộ Tài Liệu</h3>
+        <button class="modal-close" onclick="closePaymentModal()" aria-label="Đóng"><i class="fa-solid fa-xmark"></i></button>
+      </div>
+      <div class="modal-body">
+        <!-- Bước 1: Chọn gói và nhập số điện thoại -->
+        <div id="payment-step-1">
+          <div style="background: #fff7ed; border: 1px solid #ffedd5; border-radius: var(--radius-md); padding: 0.75rem 0.9rem; font-size: 0.82rem; color: #9a3412; display: flex; gap: 0.5rem; margin-bottom: 1rem;">
+            <i class="fa-solid fa-shield-halved" style="margin-top: 2px;"></i>
+            <span>Dùng trên <strong>tối đa 2 máy tính</strong> trong thời hạn <strong>7 ngày (1 tuần)</strong>. Sau khi quét QR, web sẽ tự động mở khóa ngay!</span>
+          </div>
+
+          <div class="form-group" style="margin-bottom: 0.85rem;">
+            <label style="display: block; font-weight: 700; font-size: 0.85rem; margin-bottom: 0.35rem;">1. Nhập Số Điện Thoại / Zalo của bạn (Dùng làm Mã PIN đăng nhập):</label>
+            <input type="tel" id="pay-phone-input" class="form-control" placeholder="VD: 0912345678" style="font-weight: 600; font-size: 1rem;">
+            <small style="color: var(--text-muted); font-size: 0.76rem; display: block; margin-top: 0.25rem;">
+              Số điện thoại này sẽ là Mã PIN giúp bạn mở khóa trên cả 2 máy tính trong 7 ngày.
+            </small>
+          </div>
+
+          <div class="form-group" style="margin-bottom: 1rem;">
+            <label style="display: block; font-weight: 700; font-size: 0.85rem; margin-bottom: 0.45rem;">2. Chọn Gói Tải Tài Liệu:</label>
+            <div style="display: flex; flex-direction: column; gap: 0.5rem;">
+              <label style="display: flex; align-items: center; justify-content: space-between; padding: 0.65rem 0.85rem; border: 2px solid #3b82f6; border-radius: var(--radius-md); background: #eff6ff; cursor: pointer;">
+                <div style="display: flex; align-items: center; gap: 0.65rem;">
+                  <input type="radio" name="pay-package" value="SINGLE" checked onchange="updatePaymentPackageUI()">
+                  <div>
+                    <strong style="font-size: 0.9rem; color: #1e40af;">Gói 1 Khối Lớp (Tùy chọn)</strong>
+                    <div style="font-size: 0.76rem; color: var(--text-muted);">Mở toàn bộ KHBD & Bài giảng của 1 khối trong 7 ngày</div>
+                  </div>
+                </div>
+                <strong style="color: #2563eb; font-size: 1.05rem;">100.000đ</strong>
+              </label>
+
+              <!-- Chọn khối nếu mua gói 1 khối -->
+              <div id="single-grade-picker" style="padding: 0.5rem 0.75rem; background: #f8fafc; border: 1px solid #e2e8f0; border-radius: var(--radius-md); margin-top: -0.25rem;">
+                <label style="font-size: 0.78rem; font-weight: 600; color: #475569;">Chọn khối bạn đang giảng dạy:</label>
+                <select id="pay-grade-select" class="form-select" style="margin-top: 0.25rem;" onchange="updatePaymentPackageUI()">
+                  <option value="1">Khối 1 (Lớp 1)</option>
+                  <option value="2">Khối 2 (Lớp 2)</option>
+                  <option value="3">Khối 3 (Lớp 3)</option>
+                  <option value="4">Khối 4 (Lớp 4)</option>
+                  <option value="5" selected>Khối 5 (Lớp 5)</option>
+                </select>
+              </div>
+
+              <label style="display: flex; align-items: center; justify-content: space-between; padding: 0.65rem 0.85rem; border: 1px solid #cbd5e1; border-radius: var(--radius-md); background: #ffffff; cursor: pointer;">
+                <div style="display: flex; align-items: center; gap: 0.65rem;">
+                  <input type="radio" name="pay-package" value="ALL" onchange="updatePaymentPackageUI()">
+                  <div>
+                    <strong style="font-size: 0.9rem; color: #7c3aed;">Gói VIP Toàn Bộ 5 Khối Lớp</strong>
+                    <div style="font-size: 0.76rem; color: var(--text-muted);">Mở toàn bộ tài liệu Khối 1 đến Khối 5 trong 7 ngày</div>
+                  </div>
+                </div>
+                <strong style="color: #7c3aed; font-size: 1.05rem;">350.000đ</strong>
+              </label>
+            </div>
+          </div>
+
+          <button class="btn btn-primary" style="width: 100%; height: 42px; font-size: 0.95rem; background: linear-gradient(135deg, #ea580c, #f97316);" onclick="generateQrCodeStep()">
+            <i class="fa-solid fa-qrcode"></i> Tạo Mã QR Chuyển Khoản Mở Khóa
+          </button>
+        </div>
+
+        <!-- Bước 2: Hiển thị mã VietQR thanh toán -->
+        <div id="payment-step-2" style="display: none; text-align: center;">
+          <div style="font-weight: 700; font-size: 0.88rem; color: var(--primary); margin-bottom: 0.2rem;">
+            QUÉT MÃ VIETQR QUA ỨNG DỤNG NGÂN HÀNG
+          </div>
+          <p style="font-size: 0.75rem; color: var(--text-muted); margin-bottom: 0.5rem;">
+            Mở App ngân hàng bất kỳ (Agribank, Vietcombank, MB...) quét mã bên dưới
+          </p>
+
+          <div style="background: #ffffff; padding: 0.5rem; border-radius: var(--radius-md); display: inline-block; border: 2px dashed #ea580c; box-shadow: var(--shadow-sm); margin-bottom: 0.5rem;">
+            <img id="vietqr-image" src="" alt="Mã VietQR" style="width: 175px; height: 175px; display: block; margin: 0 auto; object-fit: contain;">
+          </div>
+
+          <div style="background: #f8fafc; border: 1px solid #e2e8f0; border-radius: var(--radius-md); padding: 0.55rem 0.75rem; text-align: left; font-size: 0.8rem; margin-bottom: 0.6rem;">
+            <div style="display: flex; justify-content: space-between; margin-bottom: 0.25rem;">
+              <span style="color: var(--text-muted);">Ngân hàng:</span>
+              <strong>Agribank</strong>
+            </div>
+            <div style="display: flex; justify-content: space-between; margin-bottom: 0.25rem;">
+              <span style="color: var(--text-muted);">Số tài khoản:</span>
+              <strong style="color: #b91c1c; font-family: monospace; font-size: 0.9rem;">7411215029816</strong>
+            </div>
+            <div style="display: flex; justify-content: space-between; margin-bottom: 0.25rem;">
+              <span style="color: var(--text-muted);">Chủ tài khoản:</span>
+              <strong>LÊ THÀNH LONG</strong>
+            </div>
+            <div style="display: flex; justify-content: space-between; margin-bottom: 0.25rem;">
+              <span style="color: var(--text-muted);">Số tiền:</span>
+              <strong id="qr-amount-text" style="color: #15803d; font-size: 0.9rem;">100.000đ</strong>
+            </div>
+            <div style="display: flex; justify-content: space-between; padding-top: 0.25rem; border-top: 1px dashed #cbd5e1;">
+              <span style="color: var(--text-muted);">Nội dung chuyển khoản:</span>
+              <strong id="qr-memo-text" style="color: #c2410c; font-family: monospace; font-size: 0.88rem;">TV 0912345678</strong>
+            </div>
+          </div>
+
+          <div style="display: flex; align-items: center; justify-content: center; gap: 0.4rem; font-size: 0.78rem; color: #0369a1; background: #e0f2fe; padding: 0.4rem; border-radius: var(--radius-sm); margin-bottom: 0.65rem;">
+            <i class="fa-solid fa-spinner fa-spin"></i>
+            <span>Hệ thống đang tự động lắng nghe giao dịch...</span>
+          </div>
+
+          <div style="display: flex; gap: 0.5rem; padding-bottom: 0.25rem;">
+            <button class="btn btn-outline" style="flex: 1; padding: 0.5rem;" onclick="backToPaymentStep1()">
+              <i class="fa-solid fa-arrow-left"></i> Chọn lại
+            </button>
+            <a id="btn-zalo-confirm" href="https://zalo.me/0931049998" target="_blank" class="btn btn-primary" style="flex: 1; padding: 0.5rem; background: #0068ff; border-color: #0068ff;">
+              <i class="fa-solid fa-paper-plane"></i> Gửi Bill qua Zalo
+            </a>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ==========================================
+       MODAL 2: NHẬP MÃ PIN MỞ KHÓA (PIN ACCESS)
+       ========================================== -->
+  <div class="modal" id="pin-modal">
+    <div class="modal-backdrop" onclick="closePinModal()"></div>
+    <div class="modal-content" style="max-width: 440px;">
+      <div class="modal-header">
+        <h3><i class="fa-solid fa-key" style="color: #f59e0b;"></i> Nhập Số Điện Thoại / Mã PIN</h3>
+        <button class="modal-close" onclick="closePinModal()" aria-label="Đóng"><i class="fa-solid fa-xmark"></i></button>
+      </div>
+      <div class="modal-body">
+        <div style="background: #e0f2fe; border: 1px solid #bae6fd; border-radius: var(--radius-md); padding: 0.75rem 0.9rem; font-size: 0.82rem; color: #0369a1; display: flex; gap: 0.5rem; margin-bottom: 1rem;">
+          <i class="fa-solid fa-circle-info" style="margin-top: 2px;"></i>
+          <span>Nhập <strong>Số điện thoại</strong> đã đăng ký hoặc Mã PIN do Thầy Long cấp để mở khóa.</span>
+        </div>
+        <div>
+          <label style="display: block; font-weight: 600; font-size: 0.85rem; margin-bottom: 0.4rem;">Số điện thoại / Mã PIN:</label>
+          <input type="text" id="input-pin-code" class="form-control text-uppercase" placeholder="Nhập số điện thoại hoặc mã PIN..." autofocus>
+          <small style="color: var(--text-muted); font-size: 0.76rem; display: block; margin-top: 0.35rem;">
+            Chưa có mã? Bấm <a href="javascript:void(0)" onclick="closePinModal(); openPaymentModal();" style="color: #ea580c; font-weight: 700;">Nạp tiền / Quét QR</a> hoặc liên hệ Zalo: <a href="https://zalo.me/0931049998" target="_blank" style="color: #0284c7; font-weight: 700;">0931.049.998</a>.
+          </small>
+        </div>
+        <div class="pin-error-msg" id="pin-error-msg" style="display: none; color: #ef4444; font-size: 0.82rem; font-weight: 600; margin-top: 0.5rem;"></div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-outline" onclick="closePinModal()">Đóng</button>
+        <button class="btn btn-primary" onclick="submitPinCode()">
+          <i class="fa-solid fa-unlock"></i> Xác Nhận Mở Khóa
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ==========================================
+       MODAL 3: ĐĂNG NHẬP QUẢN TRỊ VIÊN (ADMIN)
+       ========================================== -->
+  <div class="modal" id="admin-modal">
+    <div class="modal-backdrop" onclick="closeAdminLoginModal()"></div>
+    <div class="modal-content" style="max-width: 420px;">
+      <div class="modal-header">
+        <h3><i class="fa-solid fa-shield-halved" style="color: #2563eb;"></i> Đăng Nhập Quản Trị Viên</h3>
+        <button class="modal-close" onclick="closeAdminLoginModal()" aria-label="Đóng"><i class="fa-solid fa-xmark"></i></button>
+      </div>
+      <div class="modal-body">
+        <p style="font-size: 0.84rem; color: var(--text-muted); margin-bottom: 0.85rem;">
+          Dành riêng cho <strong>Thầy Lê Thành Long</strong> để quản lý toàn bộ hệ thống thư viện.
+        </p>
+        <div>
+          <label style="display: block; font-weight: 600; font-size: 0.85rem; margin-bottom: 0.4rem;">Mật khẩu Quản trị:</label>
+          <div style="position: relative; display: flex; align-items: center;">
+            <input type="password" id="admin-password-input" placeholder="Nhập mật khẩu Admin..." style="width: 100%; padding: 0.65rem 2.6rem 0.65rem 0.85rem; border: 1px solid var(--border-color); border-radius: var(--radius-md); font-size: 0.9rem; outline: none;">
+            <button type="button" id="btn-toggle-password-visibility" style="position: absolute; right: 0.75rem; background: none; border: none; color: var(--text-muted); cursor: pointer; font-size: 1rem; padding: 0.25rem;">
+              <i class="fa-solid fa-eye"></i>
+            </button>
+          </div>
+          <small style="color: var(--text-muted); font-size: 0.76rem; display: block; margin-top: 0.35rem;">
+            Mật khẩu do Quản trị viên cấp riêng.
+          </small>
+        </div>
+        <div class="pin-error-msg" id="admin-error-msg" style="display: none; color: #ef4444; font-size: 0.82rem; font-weight: 600; margin-top: 0.5rem;"></div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-outline" onclick="closeAdminLoginModal()">Hủy</button>
+        <button class="btn btn-primary" onclick="submitAdminLogin()">
+          <i class="fa-solid fa-right-to-bracket"></i> Đăng Nhập
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Nút Liên hệ Zalo / Hỗ trợ nổi -->
+  <div class="floating-contact-wrap">
+    <a href="https://zalo.me/0931049998" target="_blank" class="contact-btn contact-btn-zalo" title="Liên hệ qua Zalo 0931049998">
+      <div class="contact-icon-circle">
+        <i class="fa-solid fa-comment-dots"></i>
+      </div>
+      <span>Liên hệ Zalo</span>
+    </a>
+  </div>
+
+  <!-- Vùng chứa thông báo Toast -->
+  <div class="toast-container" id="toast-container"></div>
+
+  <!-- Kho Sách Giáo Khoa Số Hóa KNTT - Khối 5 -->
+  <script src="js/sgk/sgk-registry.js" defer></script>
+  <script src="js/sgk/lop5/toan-5.js" defer></script>
+  <script src="js/sgk/lop5/tieng-viet-5.js" defer></script>
+  <script src="js/sgk/lop5/khoa-hoc-5.js" defer></script>
+  <script src="js/sgk/lop5/lich-su-dia-li-5.js" defer></script>
+  <script src="js/sgk/lop5/cong-nghe-5.js" defer></script>
+  <script src="js/sgk/lop5/tin-hoc-5.js" defer></script>
+  <script src="js/sgk/lop5/tieng-anh-5.js" defer></script>
+
+  <!-- Kho Sách Giáo Khoa Số Hóa KNTT - Khối 4 -->
+  <script src="js/sgk/lop4/toan-4.js" defer></script>
+  <script src="js/sgk/lop4/tieng-viet-4.js" defer></script>
+  <script src="js/sgk/lop4/khoa-hoc-4.js" defer></script>
+  <script src="js/sgk/lop4/lich-su-dia-li-4.js" defer></script>
+  <script src="js/sgk/lop4/cong-nghe-4.js" defer></script>
+  <script src="js/sgk/lop4/tin-hoc-4.js" defer></script>
+  <script src="js/sgk/lop4/tieng-anh-4.js" defer></script>
+
+  <!-- Kho Sách Giáo Khoa Số Hóa KNTT - Khối 3 -->
+  <script src="js/sgk/lop3/toan-3.js" defer></script>
+  <script src="js/sgk/lop3/tieng-viet-3.js" defer></script>
+  <script src="js/sgk/lop3/tnxh-3.js" defer></script>
+  <script src="js/sgk/lop3/cong-nghe-3.js" defer></script>
+  <script src="js/sgk/lop3/tin-hoc-3.js" defer></script>
+  <script src="js/sgk/lop3/tieng-anh-3.js" defer></script>
+
+  <!-- Kho Sách Giáo Khoa Số Hóa KNTT - Khối 2 -->
+  <script src="js/sgk/lop2/toan-2.js" defer></script>
+  <script src="js/sgk/lop2/tieng-viet-2.js" defer></script>
+  <script src="js/sgk/lop2/tnxh-2.js" defer></script>
+  <script src="js/sgk/lop2/tieng-anh-2.js" defer></script>
+
+  <!-- Kho Sách Giáo Khoa Số Hóa KNTT - Khối 1 -->
+  <script src="js/sgk/lop1/toan-1.js" defer></script>
+  <script src="js/sgk/lop1/tieng-viet-1.js" defer></script>
+  <script src="js/sgk/lop1/tnxh-1.js" defer></script>
+  <script src="js/sgk/lop1/tieng-anh-1.js" defer></script>
+
+  <!-- Thư viện xử lý bảng tính Excel & Nén tệp -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js" defer></script>
+
+  <!-- Kho Kế Hoạch Bài Dạy (KHBD) Số Hóa Chuẩn 100% CV 2345 -->
+  <script src="js/khbd_sohoa/khbd-registry.js" defer></script>
+  <script src="js/academic-calendar.js?v=20260916_a4" defer></script>
+  <script src="js/integration-service.js?v=20260916_a4" defer></script>
+
+  <!-- Scripts Logic -->
+  <script src="js/config.js?v=20260916_a4" defer></script>
+  <script src="js/data.js?v=20260916_a4" defer></script>
+  <script src="js/auth.js?v=20260916_a4" defer></script>
+  <script src="js/drive-service.js?v=20260916_a4" defer></script>
+  <script src="js/ai-service.js?v=20260916_a4" defer></script>
+  <script src="js/toolkit.js?v=20260916_a4" defer></script>
+  <script src="js/app.js?v=20260916_a4" defer></script>
+</body>
+</html>

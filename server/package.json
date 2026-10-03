@@ -1,0 +1,22 @@
+{
+  "name": "ai-exam-builder-server",
+  "version": "1.0.0",
+  "description": "AI Exam Builder Server for Vietnamese Primary Education (TT27, GDPT 2018, SEA-PLM)",
+  "main": "src/index.js",
+  "scripts": {
+    "start": "node src/index.js",
+    "dev": "node --watch src/index.js"
+  },
+  "dependencies": {
+    "cors": "^2.8.5",
+    "docx": "^9.2.1",
+    "dotenv": "^16.4.7",
+    "exceljs": "^4.4.0",
+    "express": "^4.21.2",
+    "mammoth": "^1.12.3",
+    "multer": "^2.4.0",
+    "pdf-parse": "^2.4.5",
+    "uuid": "^11.1.0",
+    "xlsx": "^0.18.5"
+  }
+}

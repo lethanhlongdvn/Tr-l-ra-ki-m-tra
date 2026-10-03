@@ -1,0 +1,26 @@
+# Node dependencies
+node_modules/
+client/node_modules/
+server/node_modules/
+
+# Production build outputs
+dist/
+client/dist/
+
+# Exclude large binary reference files (>100MB PDF/PPTX/ZIP)
+*.pdf
+*.pptx
+*.zip
+*.mhtml
+
+# Reference folders with heavy PDF files
+SACH GIAO KHOA/
+MON TIẾNG ANH/
+SEA PLM/
+TAI LIỆU PHỤC VỤ RA ĐỀ ĐỌC HIỂU VA ĐỌC TRẢ LỜI CÂU HỎI MON TIẾNG VIỆT/
+
+# Logs & Environment
+*.log
+.env
+scratch/
+.DS_Store

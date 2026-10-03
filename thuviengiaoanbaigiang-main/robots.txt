@@ -1,0 +1,4 @@
+﻿User-agent: *
+Allow: /
+
+Sitemap: https://thuviengiaoanbaigiang.netlify.app/sitemap.xml
