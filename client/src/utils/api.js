@@ -15,8 +15,17 @@ export async function fetchJson(endpoint, options = {}) {
   });
 
   if (!response.ok) {
-    const errorData = await response.json().catch(() => ({}));
-    throw new Error(errorData.error || `HTTP error! status: ${response.status}`);
+    let errMsg = `HTTP error! status: ${response.status}`;
+    try {
+      const errorData = await response.json();
+      if (errorData && errorData.error) errMsg = errorData.error;
+    } catch (_) {
+      try {
+        const text = await response.text();
+        if (text) errMsg = text.slice(0, 150);
+      } catch (__) {}
+    }
+    throw new Error(errMsg);
   }
 
   return response.json();

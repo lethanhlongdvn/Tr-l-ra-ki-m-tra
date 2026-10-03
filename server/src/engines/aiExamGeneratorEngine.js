@@ -192,7 +192,15 @@ class AiExamGeneratorEngine {
             throw new Error("Đã vượt quá giới hạn lượt gọi (Quota 429) của Google Gemini API. Vui lòng đợi 30 giây rồi thử lại!");
           }
           if (res.status === 400 || res.status === 403) {
+            if (key !== this.defaultApiKey && this.defaultApiKey) {
+              console.warn("Khóa API người dùng không hợp lệ hoặc bị lỗi, tự động chuyển sang khóa hệ thống.");
+              return await this.callGemini(this.defaultApiKey, prompt, systemInstruction);
+            }
             throw new Error(`Google Gemini API Key không hợp lệ hoặc đã bị khóa (HTTP ${res.status}): ${errText}`);
+          }
+          if (res.status === 404) {
+            console.warn(`Model ${model} không tồn tại hoặc không khả dụng cho key này (404), chuyển model tiếp theo...`);
+            continue;
           }
           throw new Error(`Gemini ${model} HTTP ${res.status}: ${errText}`);
         }
@@ -218,6 +226,11 @@ class AiExamGeneratorEngine {
           throw err;
         }
       }
+    }
+
+    if (key !== this.defaultApiKey && this.defaultApiKey) {
+      console.warn("Tất cả models thất bại với key người dùng, tự động thử lại bằng khóa hệ thống...");
+      return await this.callGemini(this.defaultApiKey, prompt, systemInstruction);
     }
 
     throw lastErr || new Error("Không thể kết nối tới Google Gemini API.");
