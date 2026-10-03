@@ -148,7 +148,7 @@ class AiExamGeneratorEngine {
       throw new Error("Chưa cấu hình Google Gemini API Key hoặc Key không hợp lệ. Vui lòng kiểm tra lại cài đặt!");
     }
 
-    const models = ["gemini-2.5-flash", "gemini-flash-latest", "gemini-2.5-flash-lite"];
+    const models = ["gemini-3.5-flash", "gemini-3.5-flash-lite", "gemini-2.5-flash", "gemini-flash-latest"];
     let lastErr = null;
 
     for (const model of models) {
@@ -159,8 +159,10 @@ class AiExamGeneratorEngine {
           maxOutputTokens: 8192,
           responseMimeType: "application/json"
         };
-        // Tắt thinking budget ở gemini-2.5-flash để tốc độ sinh JSON siêu tốc (1-2s) và chống cạn kiệt output tokens
-        if (model === "gemini-2.5-flash") {
+        // Tắt/giảm thinking budget để tốc độ sinh JSON siêu tốc (1-2s) và chống cạn kiệt output tokens
+        if (model.startsWith("gemini-3.")) {
+          genConfig.thinkingConfig = { thinkingLevel: "minimal" };
+        } else if (model.includes("2.5")) {
           genConfig.thinkingConfig = { thinkingBudget: 0 };
         }
 

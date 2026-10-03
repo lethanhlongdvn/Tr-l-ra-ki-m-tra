@@ -35,7 +35,7 @@ class OldExamParserEngine {
     const apiKey = options.apiKey || DEFAULT_GEMINI_KEY;
     if (!apiKey) throw new Error("Chưa cấu hình Gemini API Key");
 
-    const models = ["gemini-2.5-flash", "gemini-1.5-flash"];
+    const models = ["gemini-3.5-flash", "gemini-3.5-flash-lite", "gemini-2.5-flash", "gemini-1.5-flash"];
     let lastErr = null;
 
     for (const model of models) {
