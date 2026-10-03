@@ -4,7 +4,17 @@
  */
 
 const mammoth = require('mammoth');
-const { PDFParse } = require('pdf-parse');
+
+let PDFParse = null;
+try {
+  if (typeof globalThis.DOMMatrix === 'undefined') {
+    globalThis.DOMMatrix = class DOMMatrix {};
+  }
+  const pdfParsePkg = require('pdf-parse');
+  PDFParse = pdfParsePkg.PDFParse || pdfParsePkg;
+} catch (e) {
+  console.warn('pdf-parse không khả dụng trên môi trường serverless, sẽ dùng Gemini Vision thay thế:', e.message);
+}
 
 // Khóa API Gemini mặc định để nhận diện Vision & LLM
 const DEFAULT_GEMINI_KEY = (function() {
@@ -77,15 +87,17 @@ class OldExamParserEngine {
 
     // 2. Tệp PDF
     if (mimeType === 'application/pdf' || lowerName.endsWith('.pdf')) {
-      try {
-        const parser = new PDFParse({ data: new Uint8Array(buffer) });
-        const textObj = await parser.getText();
-        const text = typeof textObj === 'string' ? textObj : (textObj?.text || '');
-        if (text && text.trim().length > 30) {
-          return text;
+      if (PDFParse) {
+        try {
+          const parser = new PDFParse({ data: new Uint8Array(buffer) });
+          const textObj = await parser.getText();
+          const text = typeof textObj === 'string' ? textObj : (textObj?.text || '');
+          if (text && text.trim().length > 30) {
+            return text;
+          }
+        } catch (err) {
+          console.warn("Lỗi đọc PDF bằng PDFParse, thử OCR qua Gemini Vision:", err.message);
         }
-      } catch (err) {
-        console.warn("Lỗi đọc PDF bằng PDFParse, thử OCR qua Gemini Vision:", err.message);
       }
 
       // Fallback: OCR bằng Gemini Vision cho PDF quét/ảnh
