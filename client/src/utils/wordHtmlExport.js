@@ -53,19 +53,37 @@ class WordImageCollector {
     const b64 = resolveImageToDataUri(item, targetGrade);
     if (!b64 || !b64.startsWith('data:image')) return '';
 
+    const cleanB64 = b64.replace(/^data:image\/[a-zA-Z0-9+.-]+;base64,/, '').trim();
+
+    // Tối ưu dung lượng: tái sử dụng ảnh nếu trùng lặp nội dung Base64
+    for (const [_, existing] of this.images.entries()) {
+      if (existing.data === cleanB64) {
+        return existing.relativeSrc;
+      }
+    }
+
     this.counter++;
     const safeExt = b64.includes('image/jpeg') ? '.jpg' : '.png';
     const rawName = (typeof item === 'object' ? (item.image || item.imageKey || '') : item) || '';
     const preferredName = rawName.split('/').pop().split('\\').pop();
     const baseName = (preferredName ? preferredName.replace(/\.[^/.]+$/, '') : `img_${this.counter}`)
       .replace(/[^a-zA-Z0-9_-]/g, '_');
-    const location = `word_${this.counter}_${baseName}${safeExt}`;
+    const filename = `word_${this.counter}_${baseName}${safeExt}`;
+    const relativeSrc = `exam_document_files/${filename}`;
+    const fullLocation = `file:///C:/exam_document_files/${filename}`;
+    const cid = `${filename}`;
 
-    const cleanB64 = b64.replace(/^data:image\/[a-zA-Z0-9+.-]+;base64,/, '').trim();
     const mimeType = b64.includes('image/jpeg') ? 'image/jpeg' : 'image/png';
 
-    this.images.set(location, { location, mimeType, data: cleanB64 });
-    return location;
+    this.images.set(filename, {
+      filename,
+      relativeSrc,
+      fullLocation,
+      cid,
+      mimeType,
+      data: cleanB64
+    });
+    return relativeSrc;
   }
 
   hasImages() {
@@ -87,11 +105,12 @@ class WordImageCollector {
       ''
     ];
 
-    for (const [location, img] of this.images.entries()) {
+    for (const [_, img] of this.images.entries()) {
       parts.push(`--${boundary}`);
       parts.push(`Content-Type: ${img.mimeType}`);
       parts.push('Content-Transfer-Encoding: base64');
-      parts.push(`Content-Location: ${location}`);
+      parts.push(`Content-ID: <${img.cid}>`);
+      parts.push(`Content-Location: ${img.fullLocation}`);
       parts.push('');
       parts.push(img.data);
       parts.push('');
@@ -249,10 +268,11 @@ export function buildStandardExamHtml(exam, { forPdf = false, isPrint = false } 
 </head>
 <body>
 ` : `
-<html xmlns:o='urn:schemas-microsoft-com:office:office' xmlns:w='urn:schemas-microsoft-com:office:word' xmlns='http://www.w3.org/TR/REC-html40'>
+<html xmlns:v='urn:schemas-microsoft-com:vml' xmlns:o='urn:schemas-microsoft-com:office:office' xmlns:w='urn:schemas-microsoft-com:office:word' xmlns:m='http://schemas.microsoft.com/office/2004/12/omml' xmlns='http://www.w3.org/TR/REC-html40'>
 <head>
   <meta charset='utf-8'>
   <title>Đề kiểm tra ${subjectName} Lớp ${grade}</title>
+  <link rel="File-List" href="exam_document_files/filelist.xml">
   <!--[if gte mso 9]>
   <xml>
     <w:WordDocument>
