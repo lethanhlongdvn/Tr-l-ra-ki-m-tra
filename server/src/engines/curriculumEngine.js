@@ -34,40 +34,39 @@ class CurriculumEngine {
   }
 
   /**
-   * Lấy các kỳ kiểm tra theo khối lớp và môn học (chuẩn TT 27)
+   * Lấy các kỳ kiểm tra theo khối lớp (chuẩn TT 27)
    */
-  getExamPeriods(grade, subject = '') {
-    const g = Number(grade) || 4;
-    const isMathOrTV = (subject || "").toLowerCase().includes("toán") || (subject || "").toLowerCase().includes("tiếng việt");
-
-    if (g === 1 || g === 2) {
-      return tt27Rules.examPeriods.grade1_2;
+  getExamPeriods(grade) {
+    if (grade >= 4) {
+      return tt27Rules.examPeriods.grade4_5;
     }
-    if (g === 3) {
-      return tt27Rules.examPeriods.grade3;
-    }
-    // Lớp 4 và 5
-    if (isMathOrTV) {
-      return tt27Rules.examPeriods.grade4_5_math_tv;
-    }
-    return tt27Rules.examPeriods.grade4_5_others;
+    return tt27Rules.examPeriods.grade1_3;
   }
 
   /**
-   * Lọc bài học và YCCĐ đã học theo khối lớp, môn học và kỳ kiểm tra
+   * Lọc bài học và YCCĐ đã học theo khối lớp, môn học và kỳ kiểm tra (Tập 1 vs Tập 2)
    */
   getCurriculumScope(grade, subject, examPeriodId) {
-    const allPeriods = this.getExamPeriods(grade, subject);
+    const allPeriods = this.getExamPeriods(grade);
     let periodObj = allPeriods.find(p => p.id === examPeriodId);
     if (!periodObj) {
-      periodObj = allPeriods.find(p => p.name === examPeriodId) || allPeriods[0];
+      // Tìm theo tên hoặc mặc định Cuối học kỳ I
+      periodObj = allPeriods.find(p => p.name === examPeriodId) || {
+        id: examPeriodId || "end_term_1",
+        name: "Cuối học kỳ I",
+        weeksRange: [1, 18],
+        semester: "Học kỳ 1",
+        volume: 1
+      };
     }
 
     const minWeek = periodObj.weeksRange ? periodObj.weeksRange[0] : 1;
     const maxWeek = periodObj.weeksRange ? periodObj.weeksRange[1] : 18;
     const isSem2 = periodObj.id === 'mid_term_2' || periodObj.id === 'end_year' || (periodObj.semester && periodObj.semester.includes('2'));
     const volume = isSem2 ? 2 : 1;
-    const volumeName = `Sách Tập ${volume} (Tuần ${minWeek} – ${maxWeek})`;
+    const volumeName = isSem2 
+      ? (periodObj.id === 'mid_term_2' ? "Sách Tập 2 (Tuần 19 - 27)" : "Sách Tập 2 & Ôn tập cuối năm (Tuần 19 - 35)")
+      : (periodObj.id === 'mid_term_1' ? "Sách Tập 1 (Tuần 1 - 9)" : "Sách Tập 1 (Tuần 1 - 18)");
 
     const normSubj = this.normalizeSubject(subject);
     const matchedCurriculum = curriculumData.curriculum.filter(
@@ -78,9 +77,21 @@ class CurriculumEngine {
 
     matchedCurriculum.forEach(curr => {
       curr.topics.forEach(topic => {
-        // Lấy bài học nằm đúng trong khoảng tuần quy định của kỳ kiểm tra
+        // Chỉ lấy bài học nằm đúng trong học kỳ và khoảng tuần đã dạy
         const lessonsTaught = topic.lessons.filter(l => {
           const w = l.week || (l.semester === 2 ? 20 : 5);
+          if (periodObj.id === 'mid_term_1') {
+            return w >= 1 && w <= 9 && (l.semester === 1 || !l.semester || l.volume === 1);
+          }
+          if (periodObj.id === 'end_term_1') {
+            return w >= 1 && w <= 18 && (l.semester === 1 || !l.semester || l.volume === 1);
+          }
+          if (periodObj.id === 'mid_term_2') {
+            return w >= 19 && w <= 27 && (l.semester === 2 || l.volume === 2 || w >= 19);
+          }
+          if (periodObj.id === 'end_year') {
+            return (w >= 19 && w <= 35) || (l.title && l.title.toLowerCase().includes('ôn tập'));
+          }
           return w >= minWeek && w <= maxWeek;
         });
 

@@ -1,6 +1,6 @@
 {
   "name": "app-thay-toan",
-  "version": "1.0.0",
+  "version": "1.0.2",
   "private": true,
   "scripts": {
     "build": "cd client && npm install && npm run build",

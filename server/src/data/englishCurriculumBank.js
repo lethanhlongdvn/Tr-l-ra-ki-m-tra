@@ -205,6 +205,143 @@ Mary: It's swimming.`,
             { criteria: "Grammar & Vocabulary", points: 0.5, desc: "Dùng đúng mẫu câu và từ vựng đã học" }
           ]
         }
+      },
+      term2: {
+        listening: [
+          {
+            taskNumber: 1,
+            taskTitle: "Listen and circle (or tick)",
+            taskDesc: "Listen to the dialogue and choose the correct option (a or b).",
+            points: 1.0,
+            items: [
+              { id: "G3-L1-T2-1", question: "Who's this?", options: [{ id: "a", text: "It's my father", image: "/images/english/grade3/image2.png" }, { id: "b", text: "It's my mother", image: "/images/english/grade3/image4.png" }], correct: "a", level: "M1", transcript: "1. A: Who's this? - B: It's my father." },
+              { id: "G3-L1-T2-2", question: "Do you have any cats?", options: [{ id: "a", text: "Yes, I have two cats", image: "/images/english/grade3/image5.png" }, { id: "b", text: "No, I have dogs", image: "/images/english/grade3/image6.png" }], correct: "a", level: "M1", transcript: "2. A: Do you have any cats? - B: Yes, I have two cats." },
+              { id: "G3-L1-T2-3", question: "What's the weather like?", options: [{ id: "a", text: "It's sunny", image: "/images/english/grade3/image7.png" }, { id: "b", text: "It's rainy", image: "/images/english/grade3/image8.png" }], correct: "a", level: "M2", transcript: "3. A: What's the weather like today? - B: It's sunny." },
+              { id: "G3-L1-T2-4", question: "Where are you going?", options: [{ id: "a", text: "I'm going to the beach", image: "/images/english/grade3/image9.png" }, { id: "b", text: "I'm going to school", image: "/images/english/grade3/image10.png" }], correct: "a", level: "M2", transcript: "4. A: Where are you going this summer? - B: I'm going to the beach." }
+            ]
+          },
+          {
+            taskNumber: 2,
+            taskTitle: "Listen and number",
+            taskDesc: "Listen and write numbers 1, 2, 3, 4 into the pictures.",
+            points: 1.0,
+            items: [
+              { id: "G3-L2-T2-1", label: "Picture a (Living room)", image: "/images/english/grade3/image11.png", topic: "Is there a living room? - Yes, there is.", orderIndex: 3, level: "M1", transcript: "3. Is there a living room? - Yes, there is." },
+              { id: "G3-L2-T2-2", label: "Picture b (Teddy bear)", image: "/images/english/grade3/image12.png", topic: "What toy do you have? - I have a teddy bear.", orderIndex: 1, level: "M1", transcript: "1. What toy do you have? - I have a teddy bear." },
+              { id: "G3-L2-T2-3", label: "Picture c (Wearing T-shirt)", image: "/images/english/grade3/image13.png", topic: "What are you wearing? - I'm wearing a T-shirt.", orderIndex: 4, level: "M2", transcript: "4. What are you wearing? - I'm wearing a T-shirt." },
+              { id: "G3-L2-T2-4", label: "Picture d (Zoo tiger)", image: "/images/english/grade3/image14.png", topic: "What can you see? - I can see a tiger.", orderIndex: 2, level: "M2", transcript: "2. What can you see? - I can see a tiger." }
+            ]
+          },
+          {
+            taskNumber: 3,
+            taskTitle: "Listen and tick or cross",
+            taskDesc: "Listen and write a tick (☑) or cross (🗵).",
+            points: 1.0,
+            items: [
+              { id: "G3-L3-T2-1", statement: "I would like some milk.", image: "/images/english/grade3/image15.png", correct: "☑", level: "M1", transcript: "1. What would you like? - I'd like some milk." },
+              { id: "G3-L3-T2-2", statement: "The zoo is near the park.", image: "/images/english/grade3/image16.png", correct: "☑", level: "M1", transcript: "2. Where is the zoo? - It's near the park." },
+              { id: "G3-L3-T2-3", statement: "It's snowy today.", image: "/images/english/grade3/image18.png", correct: "🗵", level: "M2", transcript: "3. Is it snowy today? - No, it's rainy." },
+              { id: "G3-L3-T2-4", statement: "I have five red cars.", image: "/images/english/grade3/image19.png", correct: "🗵", level: "M2", transcript: "4. How many cars do you have? - I have two cars." }
+            ]
+          },
+          {
+            taskNumber: 4,
+            taskTitle: "Listen and tick True or False",
+            taskDesc: "Listen to the recording and tick True or False.",
+            points: 1.0,
+            items: [
+              { id: "G3-L4-T2-1", statement: "1. A: What's your father doing? - B: He's cooking in the kitchen.", correct: "True", level: "M1", transcript: "1. A: What's your father doing? - B: He's cooking in the kitchen." },
+              { id: "G3-L4-T2-2", statement: "2. A: Is there a pond in the garden? - B: Yes, there is.", correct: "True", level: "M1", transcript: "2. A: Is there a pond in the garden? - B: Yes, there is." },
+              { id: "G3-L4-T2-3", statement: "3. A: What's the weather like? - B: It's sunny and warm.", correct: "True", level: "M1", transcript: "3. A: What's the weather like? - B: It's sunny and warm." },
+              { id: "G3-L4-T2-4", statement: "4. A: Do you have a robot? - B: No, I don't.", correct: "False", level: "M2", transcript: "4. A: Do you have a robot? - B: Yes, I have a big red robot." }
+            ]
+          }
+        ],
+        reading: [
+          {
+            taskNumber: 1,
+            taskTitle: "Read and complete",
+            taskDesc: "Read the dialogue and fill in the blanks with words from the box.",
+            points: 1.0,
+            wordBank: ["house", "cats", "sunny", "family"],
+            passage: `My name is Mai. This is my (1) ................ We live in a nice (2) ................ in the countryside. I have two small (3) ................ in the garden. Today the weather is (4) ................ and warm. We are all happy together.`,
+            answers: ["family", "house", "cats", "sunny"],
+            levels: ["M1", "M1", "M2", "M2"]
+          },
+          {
+            taskNumber: 2,
+            taskTitle: "Read and circle",
+            taskDesc: "Read the sentences and choose the correct option.",
+            points: 1.0,
+            items: [
+              { id: "G3-R2-T2-1", sentence: "I'd like some orange juice.", options: [{ id: "A", text: "Picture A (Orange juice)" }, { id: "B", text: "Picture B (Water)" }], correct: "A", level: "M1" },
+              { id: "G3-R2-T2-2", sentence: "My brother is wearing a blue shirt.", options: [{ id: "A", text: "Picture A (Blue shirt)" }, { id: "B", text: "Picture B (Red T-shirt)" }], correct: "A", level: "M1" },
+              { id: "G3-R2-T2-3", sentence: "We can see monkeys at the zoo.", options: [{ id: "A", text: "Picture A (Monkeys)" }, { id: "B", text: "Picture B (Elephants)" }], correct: "A", level: "M2" },
+              { id: "G3-R2-T2-4", sentence: "I am going to Ha Long Bay this summer.", options: [{ id: "A", text: "Picture A (Ha Long Bay)" }, { id: "B", text: "Picture B (School)" }], correct: "A", level: "M2" }
+            ]
+          }
+        ],
+        writing: [
+          {
+            taskNumber: 1,
+            taskTitle: "Look and write",
+            taskDesc: "Unscramble the letters to make meaningful words.",
+            points: 1.0,
+            hasPictures: true,
+            items: [
+              { id: "G3-W1-T2-1", clue: "a-t-h-e-f-r", hint: "f.........", answer: "father", image: "/images/english/grade3/image25.png", level: "M1" },
+              { id: "G3-W1-T2-2", clue: "o-u-s-e-h", hint: "h.........", answer: "house", image: "/images/english/grade3/image26.png", level: "M1" },
+              { id: "G3-W1-T2-3", clue: "a-i-n-r-y", hint: "r.........", answer: "rainy", image: "/images/english/grade3/image27.png", level: "M2" },
+              { id: "G3-W1-T2-4", clue: "o-r-t-s-h-s", hint: "s.........", answer: "shorts", image: "/images/english/grade3/image29.png", level: "M2" }
+            ]
+          },
+          {
+            taskNumber: 2,
+            taskTitle: "Put the words in order to make correct sentences",
+            taskDesc: "Reorder the words to make complete sentences.",
+            points: 1.0,
+            items: [
+              { id: "G3-W2-T2-1", jumbled: "is / Who / this / ? / my father / It's", answer: "Who is this? It's my father.", level: "M1" },
+              { id: "G3-W2-T2-2", jumbled: "have / Do you / any cats / ?", answer: "Do you have any cats?", level: "M1" },
+              { id: "G3-W2-T2-3", jumbled: "like today / What's / the weather / ?", answer: "What's the weather like today?", level: "M2" },
+              { id: "G3-W2-T2-4", jumbled: "wearing / I am / a blue T-shirt / .", answer: "I am wearing a blue T-shirt.", level: "M3" }
+            ]
+          }
+        ],
+        speaking: {
+          part1: {
+            title: "Part 1: Get to know each other",
+            points: 1.25,
+            desc: "The teacher interviews the pupil with personal questions.",
+            questions: [
+              "Hello! Who do you live with?",
+              "Do you have any pets at home?",
+              "What's the weather like today?",
+              "What toy do you like best?",
+              "Where are you going this summer holiday?"
+            ]
+          },
+          part2: {
+            title: "Part 2: Look and say",
+            points: 0.75,
+            desc: "Pupil looks at flashcards and answers prompts.",
+            hasPictures: true,
+            items: [
+              { id: "G3-S2-T2-1", question: "1. What animal is this? What color is it?", image: "/images/english/grade3/image30.png" },
+              { id: "G3-S2-T2-2", question: "2. Is there a garden in your house?", image: "/images/english/grade3/image31.png" }
+            ],
+            questions: [
+              "What animal is this?",
+              "What's the weather like in the picture?",
+              "What are you wearing today?"
+            ],
+            rubric: [
+              { criteria: "Pronunciation & Intonation", points: 0.75, desc: "Phát âm rõ ràng, chuẩn ngữ điệu" },
+              { criteria: "Fluency & Response", points: 0.75, desc: "Phản xạ nhanh, tự nhiên" },
+              { criteria: "Grammar & Vocabulary", points: 0.5, desc: "Dùng đúng mẫu câu và từ vựng Term 2" }
+            ]
+          }
+        }
       }
     }
   },
@@ -410,6 +547,183 @@ Mary: It's swimming.`,
             { criteria: "Fluency & Response", points: 0.35, desc: "Trả lời lưu loát, tự tin, không ngắc ngứ" },
             { criteria: "Grammar & Accuracy", points: 0.3, desc: "Dùng đúng thì hiện tại đơn, quá khứ đơn, giới từ" }
           ]
+        }
+      },
+      term2: {
+        listening: [
+          {
+            taskNumber: 1,
+            taskTitle: "Listen and tick (☑)",
+            taskDesc: "Listen to the dialogue and tick (☑) the correct box (a or b).",
+            points: 1.0,
+            hasPictures: true,
+            items: [
+              {
+                id: "G4-L1-T2-1",
+                question: "What's your favourite drink?",
+                options: [
+                  { id: "a", text: "Orange juice", image: "/images/english/grade4/image1.png" },
+                  { id: "b", text: "Milk", image: "/images/english/grade4/image2.png" }
+                ],
+                correct: "a",
+                level: "M1",
+                transcript: "1. A: What's your favourite drink? - B: It's orange juice."
+              },
+              {
+                id: "G4-L1-T2-2",
+                question: "What does he look like?",
+                options: [
+                  { id: "a", text: "He is tall", image: "/images/english/grade4/image3.png" },
+                  { id: "b", text: "He is short", image: "/images/english/grade4/image4.png" }
+                ],
+                correct: "a",
+                level: "M1",
+                transcript: "2. A: What does your brother look like? - B: He is tall and thin."
+              },
+              {
+                id: "G4-L1-T2-3",
+                question: "What's the matter with you?",
+                options: [
+                  { id: "a", text: "I have a headache", image: "/images/english/grade4/image5.png" },
+                  { id: "b", text: "I have a fever", image: "/images/english/grade4/image6.png" }
+                ],
+                correct: "b",
+                level: "M2",
+                transcript: "3. A: What's the matter with you? - B: I have a fever."
+              },
+              {
+                id: "G4-L1-T2-4",
+                question: "What would you like to be in the future?",
+                options: [
+                  { id: "a", text: "A doctor", image: "/images/english/grade4/image7.png" },
+                  { id: "b", text: "A teacher", image: "/images/english/grade4/image8.png" }
+                ],
+                correct: "a",
+                level: "M2",
+                transcript: "4. A: What would you like to be in the future? - B: I'd like to be a doctor."
+              }
+            ]
+          },
+          {
+            taskNumber: 2,
+            taskTitle: "Listen and number",
+            taskDesc: "Listen and write numbers 1, 2, 3, 4 into the pictures.",
+            points: 1.0,
+            hasPictures: true,
+            items: [
+              { id: "G4-L2-T2-1", label: "Picture a (Eco-farm in Vinh Long)", image: "/images/english/grade4/image9.png", topic: "Where were you last Sunday? - I was at the eco-farm.", orderIndex: 2, level: "M1", transcript: "2. Where were you last Sunday? - I was at the eco-farm in Vinh Long." },
+              { id: "G4-L2-T2-2", label: "Picture b (Monkeys at the zoo)", image: "/images/english/grade4/image10.png", topic: "Why do you like monkeys? - Because they are funny.", orderIndex: 1, level: "M1", transcript: "1. Why do you like monkeys? - Because they are funny." },
+              { id: "G4-L2-T2-3", label: "Picture c (Sunny weather in summer)", image: "/images/english/grade4/image11.png", topic: "What's the weather like in summer? - It's sunny and hot.", orderIndex: 4, level: "M2", transcript: "4. What's the weather like in summer? - It's sunny and hot." },
+              { id: "G4-L2-T2-4", label: "Picture d (Swimming in the sea)", image: "/images/english/grade4/image12.png", topic: "What are you going to do this summer? - I'm going to swim.", orderIndex: 3, level: "M2", transcript: "3. What are you going to do this summer? - I'm going to swim in the sea." }
+            ]
+          },
+          {
+            taskNumber: 3,
+            taskTitle: "Listen and circle",
+            taskDesc: "Listen and circle the best answer (a or b).",
+            points: 1.0,
+            items: [
+              { id: "G4-L3-T2-1", question: "What is your village like?", options: [{ id: "a", text: "It's small and quiet." }, { id: "b", text: "It's big and noisy." }], correct: "a", level: "M1", transcript: "1. A: What is your village like? - B: It's small and quiet." },
+              { id: "G4-L3-T2-2", question: "What did you do at the eco-farm?", options: [{ id: "a", text: "We picked oranges." }, { id: "b", text: "We played computer games." }], correct: "a", level: "M2", transcript: "2. A: What did you do at the eco-farm? - B: We picked oranges in the garden." },
+              { id: "G4-L3-T2-3", question: "Why does Mai want to be a nurse?", options: [{ id: "a", text: "Because she wants to look after sick people." }, { id: "b", text: "Because she likes drawing." }], correct: "a", level: "M2", transcript: "3. A: Why does Mai want to be a nurse? - B: Because she wants to look after sick people." },
+              { id: "G4-L3-T2-4", question: "When is your Sports day?", options: [{ id: "a", text: "It's in May." }, { id: "b", text: "It's in November." }], correct: "a", level: "M3", transcript: "4. A: When is your Sports day? - B: It's in May." }
+            ]
+          }
+        ],
+        reading: [
+          {
+            taskNumber: 1,
+            taskTitle: "Look and tick (☑) or cross (🗵)",
+            taskDesc: "Look at the pictures and write ☑ or 🗵.",
+            points: 1.25,
+            hasPictures: true,
+            items: [
+              { id: "G4-R1-T2-1", statement: "He has a sore throat.", image: "/images/english/grade4/image13.png", correct: "☑", level: "M1" },
+              { id: "G4-R1-T2-2", statement: "My favourite drink is lemonade.", image: "/images/english/grade4/image14.png", correct: "☑", level: "M1" },
+              { id: "G4-R1-T2-3", statement: "The village is very crowded.", image: "/images/english/grade4/image15.png", correct: "🗵", level: "M2" },
+              { id: "G4-R1-T2-4", statement: "They are picking apples at the farm.", image: "/images/english/grade4/image16.png", correct: "☑", level: "M2" },
+              { id: "G4-R1-T2-5", statement: "She wants to be a pilot.", image: "/images/english/grade4/image17.png", correct: "🗵", level: "M2" }
+            ]
+          },
+          {
+            taskNumber: 2,
+            taskTitle: "Read and complete",
+            taskDesc: "Read the passage and choose suitable words from the box.",
+            points: 1.25,
+            wordBank: ["sunny", "animals", "pick", "played", "happy"],
+            passage: `Last weekend, Nam and his class visited an eco-farm in Vinh Long. The weather was (1) ____________ and warm. They saw many (2) ____________ like cows and ducks. Nam helped to (3) ____________ fresh oranges in the garden. In the afternoon, they (4) ____________ fun games together. It was a very (5) ____________ day for everyone.`,
+            answers: ["sunny", "animals", "pick", "played", "happy"],
+            levels: ["M1", "M1", "M2", "M2", "M3"]
+          }
+        ],
+        writing: [
+          {
+            taskNumber: 1,
+            taskTitle: "Look and write",
+            taskDesc: "Complete the sentences / words based on pictures.",
+            points: 1.25,
+            hasPictures: true,
+            passage: `My sister Phong lives in a quiet village in (1) _____________. Her favourite drink is (2) _____________. She wants to be a (3) _____________ when she grows up. Last weekend, she stayed at (4) _____________ because she had a cold. Now she is (5) _______________________ in the garden.`,
+            items: [
+              { id: "G4-W1-T2-1", blankIndex: 1, word: "Vinh Long", image: "/images/english/grade4/image18.png", clue: "Vinh Long", level: "M1" },
+              { id: "G4-W1-T2-2", blankIndex: 2, word: "lemonade", image: "/images/english/grade4/image19.png", clue: "lemonade", level: "M1" },
+              { id: "G4-W1-T2-3", blankIndex: 3, word: "doctor", image: "/images/english/grade4/image20.png", clue: "doctor", level: "M2" },
+              { id: "G4-W1-T2-4", blankIndex: 4, word: "home", image: "/images/english/grade4/image21.png", clue: "home", level: "M2" },
+              { id: "G4-W1-T2-5", blankIndex: 5, word: "watering flowers", image: "/images/english/grade4/image22.png", clue: "watering flowers", level: "M3" }
+            ],
+            answers: ["Vinh Long", "lemonade", "doctor", "home", "watering flowers"],
+            levels: ["M1", "M1", "M2", "M2", "M3"]
+          },
+          {
+            taskNumber: 2,
+            taskTitle: "Reorder the words to make correct sentences",
+            taskDesc: "Put words in correct order to make meaningful sentences.",
+            points: 1.25,
+            items: [
+              { id: "G4-W2-T2-1", jumbled: "your favourite / What is / drink / ?", answer: "What is your favourite drink?", level: "M1" },
+              { id: "G4-W2-T2-2", jumbled: "the matter / What is / with you / ?", answer: "What is the matter with you?", level: "M1" },
+              { id: "G4-W2-T2-3", jumbled: "would like / I / to be a doctor / in the future / .", answer: "I would like to be a doctor in the future.", level: "M2" },
+              { id: "G4-W2-T2-4", jumbled: "weather / What is the / like in summer / ?", answer: "What's the weather like in summer?", level: "M2" },
+              { id: "G4-W2-T2-5", jumbled: "went to / We / an eco-farm / last Sunday / .", answer: "We went to an eco-farm last Sunday.", level: "M3" }
+            ]
+          }
+        ],
+        speaking: {
+          part1: {
+            title: "Part 1: Get to know each other and answer the questions",
+            points: 1.0,
+            desc: "Teacher asks questions about student's personal background and preferences.",
+            questions: [
+              "What's your favourite food and drink?",
+              "What does your best friend look like?",
+              "What's the matter when you get sick?",
+              "What would you like to be in the future?",
+              "What are you going to do this summer holiday?"
+            ]
+          },
+          part2: {
+            title: "Part 2: Look and answer",
+            points: 1.0,
+            desc: "Student looks at situational pictures and answers 4 questions.",
+            hasPictures: true,
+            items: [
+              { id: "G4-S2-T2-1", question: "1. What's your favourite drink?", image: "/images/english/grade4/image23.png" },
+              { id: "G4-S2-T2-2", question: "2. What's the matter with him?", image: "/images/english/grade4/image24.png" },
+              { id: "G4-S2-T2-3", question: "3. What did you do at the eco-farm?", image: "/images/english/grade4/image25.png" },
+              { id: "G4-S2-T2-4", question: "4. What would you like to be in the future?", image: "/images/english/grade4/image26.png" }
+            ],
+            questions: [
+              "What's your favourite drink?",
+              "What's the matter with him?",
+              "What did you do at the eco-farm?",
+              "What would you like to be in the future?"
+            ],
+            rubric: [
+              { criteria: "Pronunciation & Intonation", points: 0.35, desc: "Phát âm rõ ràng, ngữ điệu chuẩn" },
+              { criteria: "Fluency & Response", points: 0.35, desc: "Phản xạ nhanh, trôi chảy" },
+              { criteria: "Grammar & Accuracy", points: 0.3, desc: "Cấu trúc câu Term 2 chính xác" }
+            ]
+          }
         }
       }
     }
@@ -636,6 +950,202 @@ Mary: It's swimming.`,
             { criteria: "Fluency & Response", points: 0.35, desc: "Nói trôi chảy, phản xạ nhanh, trả lời thành câu hoàn chỉnh" },
             { criteria: "Grammar & Vocabulary", points: 0.3, desc: "Dùng từ chính xác, cấu trúc ngữ pháp chuẩn xác" }
           ]
+        }
+      },
+      term2: {
+        listening: [
+          {
+            taskNumber: 1,
+            taskTitle: "Listen and tick (☑)",
+            taskDesc: "Listen to the recording and tick (☑) the correct picture (a or b).",
+            points: 1.0,
+            hasPictures: true,
+            items: [
+              {
+                id: "G5-L1-T2-1",
+                question: "Question 1",
+                options: [
+                  { id: "a", text: "By bus", image: "/images/english/grade5/image1.png" },
+                  { id: "b", text: "By taxi", image: "/images/english/grade5/image2.png" }
+                ],
+                correct: "a",
+                level: "M1",
+                transcript: "1. A: How can I get to the museum? - B: You can go by bus."
+              },
+              {
+                id: "G5-L1-T2-2",
+                question: "Question 2",
+                options: [
+                  { id: "a", text: "Quiet countryside", image: "/images/english/grade5/image3.png" },
+                  { id: "b", text: "Busy city", image: "/images/english/grade5/image4.png" }
+                ],
+                correct: "a",
+                level: "M1",
+                transcript: "2. A: What's life in your hometown like? - B: It's quiet and peaceful."
+              },
+              {
+                id: "G5-L1-T2-3",
+                question: "Question 3",
+                options: [
+                  { id: "a", text: "An Tiem story", image: "/images/english/grade5/image5.png" },
+                  { id: "b", text: "Aladdin story", image: "/images/english/grade5/image6.png" }
+                ],
+                correct: "a",
+                level: "M2",
+                transcript: "3. A: What story are you reading? - B: I'm reading The Story of Mai An Tiem."
+              },
+              {
+                id: "G5-L1-T2-4",
+                question: "Question 4",
+                options: [
+                  { id: "a", text: "Planting trees", image: "/images/english/grade5/image7.png" },
+                  { id: "b", text: "Watering flowers", image: "/images/english/grade5/image8.png" }
+                ],
+                correct: "a",
+                level: "M2",
+                transcript: "4. A: How can we protect our environment? - B: We can plant more green trees."
+              }
+            ]
+          },
+          {
+            taskNumber: 2,
+            taskTitle: "Listen and circle",
+            taskDesc: "Listen to the recording and choose the correct completion (a or b).",
+            points: 1.0,
+            items: [
+              {
+                id: "G5-L2-T2-1",
+                question: "1. A: Where is the pharmacy? - B: It's ________.",
+                options: [{ id: "a", text: "opposite the bakery" }, { id: "b", text: "next to the park" }],
+                correct: "a",
+                level: "M1",
+                transcript: "1. Girl: Excuse me, where is the pharmacy? - Boy: It's opposite the bakery."
+              },
+              {
+                id: "G5-L2-T2-2",
+                question: "2. A: Why shouldn't he ride his bike too fast? - B: Because ________.",
+                options: [{ id: "a", text: "he may fall off his bike" }, { id: "b", text: "he may get lost" }],
+                correct: "a",
+                level: "M2",
+                transcript: "2. Girl: Don't ride your bike so fast! - Boy: Why not? - Girl: Because you may fall off your bike."
+              },
+              {
+                id: "G5-L2-T2-3",
+                question: "3. A: What do you think of An Tiem? - B: I think he is ________.",
+                options: [{ id: "a", text: "hard-working and clever" }, { id: "b", text: "greedy and lazy" }],
+                correct: "a",
+                level: "M2",
+                transcript: "3. Boy: What do you think of Mai An Tiem? - Girl: I think he is hard-working and clever."
+              },
+              {
+                id: "G5-L2-T2-4",
+                question: "4. A: What will houses be like in the future? - B: They will be ________.",
+                options: [{ id: "a", text: "smart houses with robots" }, { id: "b", text: "wooden houses in the woods" }],
+                correct: "a",
+                level: "M3",
+                transcript: "4. Girl: What will houses be like in the future? - Boy: They will be smart houses with helpful robots."
+              }
+            ]
+          },
+          {
+            taskNumber: 3,
+            taskTitle: "Listen and tick True or False",
+            taskDesc: "Listen and tick True (T) or False (F).",
+            points: 1.0,
+            items: [
+              { id: "G5-L3-T2-1", statement: "1. Mai visited Tra On floating market last weekend.", correct: "True", level: "M2", transcript: "A: Where were you last weekend, Mai? - B: I visited Tra On floating market in Vinh Long." },
+              { id: "G5-L3-T2-2", statement: "2. She went there by motorbike.", correct: "False", level: "M2", transcript: "A: How did you get there? - B: We went by boat on the river." },
+              { id: "G5-L3-T2-3", statement: "3. She bought many fresh fruits like pomelo and rambutan.", correct: "True", level: "M2", transcript: "A: What did you do there? - B: We bought many delicious fruits like pomelo and rambutan." },
+              { id: "G5-L3-T2-4", statement: "4. She didn't enjoy the trip.", correct: "False", level: "M3", transcript: "A: Did you enjoy it? - B: Yes, it was wonderful!" }
+            ]
+          }
+        ],
+        reading: [
+          {
+            taskNumber: 1,
+            taskTitle: "Look and tick ☑ or cross 🗵",
+            taskDesc: "Look at the pictures and words, write ☑ or 🗵.",
+            points: 1.25,
+            hasPictures: true,
+            items: [
+              { id: "G5-R1-T2-1", statement: "go by bus", caption: "go by bus", image: "/images/english/grade5/image13.png", correct: "☑", level: "M1" },
+              { id: "G5-R1-T2-2", statement: "pharmacy", caption: "pharmacy", image: "/images/english/grade5/image14.png", correct: "☑", level: "M1" },
+              { id: "G5-R1-T2-3", statement: "hard-working", caption: "hard-working", image: "/images/english/grade5/image15.png", correct: "☑", level: "M2" },
+              { id: "G5-R1-T2-4", statement: "protect the environment", caption: "protect the environment", image: "/images/english/grade5/image16.png", correct: "☑", level: "M2" },
+              { id: "G5-R1-T2-5", statement: "smart house", caption: "smart house", image: "/images/english/grade5/image17.png", correct: "🗵", level: "M2" }
+            ]
+          },
+          {
+            taskNumber: 2,
+            taskTitle: "Read and complete",
+            taskDesc: "Read the passage and fill in the blanks with words from the box.",
+            points: 1.25,
+            wordBank: ["clean", "plant", "save", "important", "green"],
+            passage: `Our primary school is building a green environment. Every Friday afternoon, pupils (1) ……………… the playground and collect plastic bottles. We (2) ……………… green trees and water flowers in the garden. We also (3) ……………… water and electricity in our classroom. Our teacher says protecting the environment is (4) ……………… for our future. We are happy with our (5) ……………… school.`,
+            answers: ["clean", "plant", "save", "important", "green"],
+            levels: ["M1", "M1", "M2", "M2", "M3"]
+          }
+        ],
+        writing: [
+          {
+            taskNumber: 1,
+            taskTitle: "Look and write",
+            taskDesc: "Rearrange scrambled letters to write correct words.",
+            points: 1.0,
+            hasPictures: true,
+            items: [
+              { id: "G5-W1-T2-1", clue: "c-o-u-n-t-r-y-s-i-d-e", hint: "c.........", answer: "countryside", image: "/images/english/grade5/image19.png", level: "M1" },
+              { id: "G5-W1-T2-2", clue: "p-h-a-r-m-a-c-y", hint: "p.........", answer: "pharmacy", image: "/images/english/grade5/image21.png", level: "M1" },
+              { id: "G5-W1-T2-3", clue: "h-a-r-d - w-o-r-k-i-n-g", hint: "h...-w.........", answer: "hard-working", image: "/images/english/grade5/image22.png", level: "M2" },
+              { id: "G5-W1-T2-4", clue: "s-m-a-r-t  h-o-u-s-e", hint: "s... h.........", answer: "smart house", image: "/images/english/grade5/image24.png", level: "M2" }
+            ]
+          },
+          {
+            taskNumber: 2,
+            taskTitle: "Make sentences",
+            taskDesc: "Reorder the words to make meaningful sentences.",
+            points: 1.5,
+            items: [
+              { id: "G5-W2-T2-1", jumbled: "is life / What / in the countryside / like / ?", answer: "What is life in the countryside like?", level: "M1" },
+              { id: "G5-W2-T2-2", jumbled: "can I get / How / to the railway station / ?", answer: "How can I get to the railway station?", level: "M1" },
+              { id: "G5-W2-T2-3", jumbled: "should not / You / ride your bike / too fast / .", answer: "You should not ride your bike too fast.", level: "M2" },
+              { id: "G5-W2-T2-4", jumbled: "do you think / What / of Mai An Tiem / ?", answer: "What do you think of Mai An Tiem?", level: "M2" },
+              { id: "G5-W2-T2-5", jumbled: "protect / We should / the environment / by planting trees / .", answer: "We should protect the environment by planting trees.", level: "M3" },
+              { id: "G5-W2-T2-6", jumbled: "will be / Smart houses / solar-powered / in the future / .", answer: "Smart houses will be solar-powered in the future.", level: "M3" }
+            ]
+          }
+        ],
+        speaking: {
+          part1: {
+            title: "Part 1: Answer the questions",
+            points: 1.5,
+            desc: "The examiner asks 6 personal questions below:",
+            questions: [
+              "1. What is your hometown like?",
+              "2. How do you usually get to school?",
+              "3. Where is the nearest supermarket from your house?",
+              "4. What is your favourite Vietnamese story?",
+              "5. What do you do to save electricity at home?",
+              "6. What will your dream house in the future be like?"
+            ]
+          },
+          part2: {
+            title: "Part 2: Look and answer the questions",
+            points: 1.0,
+            desc: "Student looks at situational pictures and answers 4 questions:",
+            hasPictures: true,
+            items: [
+              { id: "G5-S2-T2-1", question: "1. How can I get to the museum?", image: "/images/english/grade5/image9.png" },
+              { id: "G5-S2-T2-2", question: "2. Why shouldn't he run down the stairs?", image: "/images/english/grade5/image10.png" },
+              { id: "G5-S2-T2-3", question: "3. What do you think of Mai An Tiem?", image: "/images/english/grade5/image11.png" },
+              { id: "G5-S2-T2-4", question: "4. What should we do to protect our green environment?", image: "/images/english/grade5/image12.png" }
+            ],
+            rubric: [
+              { criteria: "Pronunciation & Intonation", points: 0.35, desc: "Phát âm chuẩn xác, ngữ điệu tự nhiên" },
+              { criteria: "Fluency & Response", points: 0.35, desc: "Trả lời lưu loát, phản xạ tốt" },
+              { criteria: "Grammar & Vocabulary", points: 0.3, desc: "Dùng từ chính xác theo chủ điểm Term 2" }
+            ]
+          }
         }
       }
     }

@@ -21,8 +21,8 @@ const tiengVietExamEngine = require('./tiengVietExamEngine');
 // Khóa API Gemini mặc định
 const DEFAULT_GEMINI_KEY = (function() {
   try {
-    const p1 = "QVEuQWI4Uk42SjdOZHVzZGtZNV9o";
-    const p2 = "TnB3NzRfLXJtWldpRUVraXpnMmdMaWNoQmdQaW51emc=";
+    const p1 = "QVEuQWI4Uk42S2JCdWc0WXBCM19j";
+    const p2 = "ZUVNaTItVHFaYURVSVd6R1MxWFk0Nlk0aHBkbkNKemc=";
     return Buffer.from(p1 + p2, 'base64').toString('utf8');
   } catch (e) {
     return "";
@@ -131,7 +131,7 @@ Xuất ra DUY NHẤT một khối mã JSON hợp lệ:
   ]
 }`;
 
-    const models = ["gemini-3.5-flash", "gemini-3.5-flash-lite", "gemini-2.5-flash", "gemini-1.5-flash"];
+    const models = ["gemini-2.5-flash", "gemini-1.5-flash"];
     for (const model of models) {
       try {
         const url = `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${apiKey}`;

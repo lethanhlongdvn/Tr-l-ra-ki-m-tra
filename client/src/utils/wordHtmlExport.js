@@ -12,20 +12,26 @@ import englishImagesBase64 from './englishImagesBase64.json';
  * Trình giải quyết ảnh đa năng: Chuyển đổi mọi định dạng ảnh sang Base64 Data URI
  * Đảm bảo 100% không bị lỗi ảnh chết, lỗi CORS hay lỗi mạng
  */
-export function resolveImageToDataUri(item) {
+export function resolveImageToDataUri(item, grade = null) {
   if (!item) return '';
   if (typeof item === 'object') {
-    return resolveImageToDataUri(item.image || item.imageKey || item.imageUrl || item.src);
+    return resolveImageToDataUri(item.image || item.imageKey || item.imageUrl || item.src, grade || item.grade);
   }
   if (typeof item !== 'string') return '';
   const s = item.trim();
   if (s.startsWith('data:image')) return s;
+
+  const filename = s.split('/').pop().split('\\').pop();
+  if (grade) {
+    const gradeKey = `/images/english/grade${grade}/${filename}`;
+    if (englishImagesBase64[gradeKey]) return englishImagesBase64[gradeKey];
+  }
+
   if (englishImagesBase64[s]) return englishImagesBase64[s];
 
   const normalized = '/' + s.replace(/^(\.\/|\/|dist\/)+/, '');
   if (englishImagesBase64[normalized]) return englishImagesBase64[normalized];
 
-  const filename = s.split('/').pop().split('\\').pop();
   if (englishImagesBase64[filename]) return englishImagesBase64[filename];
 
   const match = Object.keys(englishImagesBase64).find(k => k.endsWith('/' + filename));
@@ -35,14 +41,16 @@ export function resolveImageToDataUri(item) {
 }
 
 class WordImageCollector {
-  constructor() {
+  constructor(grade = null) {
     this.images = new Map();
     this.counter = 0;
+    this.grade = grade;
   }
 
-  registerImage(item) {
+  registerImage(item, grade = null) {
     if (!item) return '';
-    const b64 = resolveImageToDataUri(item);
+    const targetGrade = grade || this.grade;
+    const b64 = resolveImageToDataUri(item, targetGrade);
     if (!b64 || !b64.startsWith('data:image')) return '';
 
     this.counter++;
@@ -116,12 +124,13 @@ export function buildStandardExamHtml(exam, { forPdf = false, isPrint = false } 
   const m = exam.matrix || {};
   const matrixRows = m.matrixRows || m.rows || [];
 
-  const imgCollector = new WordImageCollector();
+  const imgCollector = new WordImageCollector(grade);
   const getWordImgSrc = (item) => {
     if (forPdf) {
-      return resolveImageToDataUri(item);
+      return resolveImageToDataUri(item, grade);
     }
-    return imgCollector.registerImage(item);
+    const loc = imgCollector.registerImage(item, grade);
+    return loc || resolveImageToDataUri(item, grade);
   };
 
   let docHtml = forPdf ? `
@@ -215,8 +224,22 @@ export function buildStandardExamHtml(exam, { forPdf = false, isPrint = false } 
       margin-bottom: 3px;
     }
     .page-break {
-      page-break-before: always;
-      break-before: page;
+      page-break-before: always !important;
+      break-before: page !important;
+      height: 0 !important;
+      max-height: 0 !important;
+      margin: 0 !important;
+      padding: 0 !important;
+      font-size: 0 !important;
+      line-height: 0 !important;
+      overflow: hidden !important;
+      clear: both !important;
+    }
+    .page-break:last-child,
+    body > .page-break:last-of-type {
+      page-break-before: avoid !important;
+      break-before: avoid !important;
+      display: none !important;
     }
     .prevent-split {
       page-break-inside: avoid;
@@ -306,6 +329,14 @@ export function buildStandardExamHtml(exam, { forPdf = false, isPrint = false } 
     const wri = parts.writing || {};
     const spk = parts.speaking || {};
 
+    const semUpper = (semester || exam.semester || '').toUpperCase();
+    const isSem2Header = semUpper.includes('II') || semUpper.includes('2') || semUpper.includes('CUỐI NĂM');
+    const isMidHeader = semUpper.includes('GIỮA') || semUpper.includes('MID');
+    const defaultTermTitle = isSem2Header 
+      ? (isMidHeader ? `THE SECOND MID-TERM TEST FOR GRADE ${grade}` : `THE SECOND TERM TEST FOR GRADE ${grade}`)
+      : (isMidHeader ? `THE FIRST MID-TERM TEST FOR GRADE ${grade}` : `THE FIRST TERM TEST FOR GRADE ${grade}`);
+    const termTestTitle = exam.title || defaultTermTitle;
+
     docHtml += `
     <!-- HEADER ĐỀ THI TIẾNG ANH CHUẨN GLOBAL SUCCESS -->
     <table class="header-table" style="width: 100%;">
@@ -313,10 +344,10 @@ export function buildStandardExamHtml(exam, { forPdf = false, isPrint = false } 
         <td style="width: 55%; vertical-align: top;">
           <div style="font-size: 13pt; font-weight: bold; text-transform: uppercase;">${exam.schoolName || 'A AN TRUONG PRIMARY SCHOOL'}</div>
           <div style="margin-top: 8px; font-size: 13pt;">Full name: ..............................................................</div>
-          <div style="margin-top: 4px; font-size: 13pt;">Class: <b>${grade}</b>...... &nbsp;&nbsp;&nbsp;&nbsp; School year: 2025-2026</div>
+          <div style="margin-top: 4px; font-size: 13pt;">Class: <b>${grade}</b>...... &nbsp;&nbsp;&nbsp;&nbsp; School year: ..................</div>
         </td>
         <td style="width: 45%; text-align: center; vertical-align: top;">
-          <div style="font-weight: bold; font-size: 14pt; text-transform: uppercase;">${exam.title || ('THE FIRST TERM TEST FOR GRADE ' + grade)}</div>
+          <div style="font-weight: bold; font-size: 14pt; text-transform: uppercase;">${termTestTitle}</div>
           <div style="font-size: 12pt; font-style: italic; margin-top: 4px;">Time allowed: ${exam.durationMinutes || 40} minutes</div>
         </td>
       </tr>
@@ -397,7 +428,7 @@ export function buildStandardExamHtml(exam, { forPdf = false, isPrint = false } 
                               </td>
                             </tr>
                           </table>
-                          ${imgSrc ? `<div style="text-align: center; margin: 4px 0;"><img src="${imgSrc}" style="max-height: 95px; max-width: 180px; height: auto;" /></div>` : ''}
+                          ${imgSrc ? `<div style="text-align: center; margin: 4px 0;"><img src="${imgSrc}" width="140" height="90" style="width: 140px; height: 90px; object-fit: contain;" /></div>` : ''}
                           <div style="font-weight: bold; font-size: 11pt; color: #1e293b;">${opt.text}</div>
                         </td>
                       `;
@@ -431,7 +462,7 @@ export function buildStandardExamHtml(exam, { forPdf = false, isPrint = false } 
                         <div style="text-align: left; font-weight: bold; font-size: 11pt; color: #0284c7;">
                           Picture ${labels[idx] || (idx + 1)}
                         </div>
-                        ${imgSrc ? `<div style="text-align: center; margin: 4px 0;"><img src="${imgSrc}" style="max-height: 90px; max-width: 130px; height: auto;" /></div>` : ''}
+                        ${imgSrc ? `<div style="text-align: center; margin: 4px 0;"><img src="${imgSrc}" width="120" height="80" style="width: 120px; height: 80px; object-fit: contain;" /></div>` : ''}
                         <div style="margin-top: 6px;">
                           <span style="display: inline-block; width: 26px; height: 26px; border: 1.5px solid #000; background: #fff; font-size: 12pt; line-height: 24px;"></span>
                         </div>
@@ -462,7 +493,7 @@ export function buildStandardExamHtml(exam, { forPdf = false, isPrint = false } 
                     return `
                       <td style="width: 25%; border: 1px solid #94a3b8; padding: 6px; vertical-align: top; background-color: #fafafa;">
                         <div style="text-align: left; font-weight: bold; font-size: 11pt;">${idx + 1}.</div>
-                        ${imgSrc ? `<div style="text-align: center; margin: 4px 0;"><img src="${imgSrc}" style="max-height: 85px; max-width: 130px; height: auto;" /></div>` : ''}
+                        ${imgSrc ? `<div style="text-align: center; margin: 4px 0;"><img src="${imgSrc}" width="120" height="80" style="width: 120px; height: 80px; object-fit: contain;" /></div>` : ''}
                         <div style="margin-top: 4px; font-size: 10pt; min-height: 28px;">${it.statement || it.topic || ''}</div>
                         <div style="margin-top: 6px;">
                           <span style="display: inline-block; width: 22px; height: 22px; border: 1.5px solid #000; background: #fff;"></span>
@@ -577,7 +608,7 @@ export function buildStandardExamHtml(exam, { forPdf = false, isPrint = false } 
                     return `
                       <td style="width: 33.33%; border: 1px solid #000; padding: 6px; vertical-align: top;">
                         <div style="text-align: left; font-weight: bold; font-size: 11pt;">${idx + 1}</div>
-                        ${imgSrc ? `<div style="text-align: center; margin: 2px 0;"><img src="${imgSrc}" style="max-height: 90px; max-width: 150px; height: auto;" /></div>` : ''}
+                        ${imgSrc ? `<div style="text-align: center; margin: 2px 0;"><img src="${imgSrc}" width="130" height="85" style="width: 130px; height: 85px; object-fit: contain;" /></div>` : ''}
                         <div style="margin-top: 4px; font-size: 11pt; font-weight: bold;">
                           ${it.caption || it.statement} &nbsp;
                           <span style="display: inline-block; width: 18px; height: 18px; border: 1.5px solid #000; vertical-align: middle;"></span>
@@ -595,7 +626,7 @@ export function buildStandardExamHtml(exam, { forPdf = false, isPrint = false } 
                       return `
                         <td style="width: 50%; border: 1px solid #000; padding: 6px; vertical-align: top;">
                           <div style="text-align: left; font-weight: bold; font-size: 11pt;">${idx + 4}</div>
-                          ${imgSrc ? `<div style="text-align: center; margin: 2px 0;"><img src="${imgSrc}" style="max-height: 90px; max-width: 150px; height: auto;" /></div>` : ''}
+                          ${imgSrc ? `<div style="text-align: center; margin: 2px 0;"><img src="${imgSrc}" width="130" height="85" style="width: 130px; height: 85px; object-fit: contain;" /></div>` : ''}
                           <div style="margin-top: 4px; font-size: 11pt; font-weight: bold;">
                             ${it.caption || it.statement} &nbsp;
                             <span style="display: inline-block; width: 18px; height: 18px; border: 1.5px solid #000; vertical-align: middle;"></span>
@@ -711,7 +742,7 @@ export function buildStandardExamHtml(exam, { forPdf = false, isPrint = false } 
                     return `
                       <td style="width: 20%; border: 1px solid #000; padding: 4px; vertical-align: top; background-color: #fafafa;">
                         <div style="text-align: left; font-weight: bold; font-size: 10.5pt; color: #7e22ce;">(${idx + 1})</div>
-                        ${imgSrc ? `<div style="text-align: center; margin: 2px 0;"><img src="${imgSrc}" style="max-height: 75px; max-width: 110px; height: auto;" /></div>` : ''}
+                        ${imgSrc ? `<div style="text-align: center; margin: 2px 0;"><img src="${imgSrc}" width="100" height="70" style="width: 100px; height: 70px; object-fit: contain;" /></div>` : ''}
                       </td>
                     `;
                   }).join('')}
@@ -743,7 +774,7 @@ export function buildStandardExamHtml(exam, { forPdf = false, isPrint = false } 
                     return `
                       <td style="width: 25%; border: 1px solid #000; padding: 6px; vertical-align: top; background-color: #fafafa;">
                         <div style="text-align: left; font-weight: bold; font-size: 11pt; color: #7e22ce;">${circleNums[idx]}</div>
-                        ${imgSrc ? `<div style="text-align: center; margin: 2px 0;"><img src="${imgSrc}" style="max-height: 85px; max-width: 125px; height: auto;" /></div>` : ''}
+                        ${imgSrc ? `<div style="text-align: center; margin: 2px 0;"><img src="${imgSrc}" width="120" height="80" style="width: 120px; height: 80px; object-fit: contain;" /></div>` : ''}
                         <div style="margin-top: 4px; font-family: monospace; font-weight: bold; font-size: 11.5pt; color: #581c87;">${it.clue || it.questionText || ''}</div>
                         <div style="margin-top: 8px; border-bottom: 1px dotted #000; height: 16px;"></div>
                         <div style="margin-top: 4px; border-bottom: 1px dotted #000; height: 16px;"></div>
@@ -821,7 +852,7 @@ export function buildStandardExamHtml(exam, { forPdf = false, isPrint = false } 
                     const widthPct = Math.round(100 / spk.data.part2.items.length);
                     return `
                       <td style="width: ${widthPct}%; border: 1px solid #000; padding: 6px; vertical-align: top; background-color: #fafafa;">
-                        ${imgSrc ? `<div style="text-align: center; margin: 2px 0;"><img src="${imgSrc}" style="max-height: 85px; max-width: 130px; height: auto;" /></div>` : ''}
+                        ${imgSrc ? `<div style="text-align: center; margin: 2px 0;"><img src="${imgSrc}" width="120" height="80" style="width: 120px; height: 80px; object-fit: contain;" /></div>` : ''}
                         <div style="margin-top: 4px; font-size: 10pt; font-weight: bold; text-align: left; color: #1e293b;">${it.question}</div>
                       </td>
                     `;
@@ -836,7 +867,7 @@ export function buildStandardExamHtml(exam, { forPdf = false, isPrint = false } 
                     const imgSrc = getWordImgSrc(it);
                     return `
                       <td style="width: 33.33%; border: 1px solid #000; padding: 6px; vertical-align: top; background-color: #fafafa;">
-                        ${imgSrc ? `<div style="text-align: center; margin: 2px 0;"><img src="${imgSrc}" style="max-height: 85px; max-width: 130px; height: auto;" /></div>` : ''}
+                        ${imgSrc ? `<div style="text-align: center; margin: 2px 0;"><img src="${imgSrc}" width="120" height="80" style="width: 120px; height: 80px; object-fit: contain;" /></div>` : ''}
                         <div style="margin-top: 4px; font-size: 10pt; font-weight: bold; text-align: left; color: #1e293b;">${it.question}</div>
                       </td>
                     `;
@@ -849,7 +880,7 @@ export function buildStandardExamHtml(exam, { forPdf = false, isPrint = false } 
                     const imgSrc = getWordImgSrc(it);
                     return `
                       <td style="width: 33.33%; border: 1px solid #000; padding: 6px; vertical-align: top; background-color: #fafafa;">
-                        ${imgSrc ? `<div style="text-align: center; margin: 2px 0;"><img src="${imgSrc}" style="max-height: 85px; max-width: 130px; height: auto;" /></div>` : ''}
+                        ${imgSrc ? `<div style="text-align: center; margin: 2px 0;"><img src="${imgSrc}" width="120" height="80" style="width: 120px; height: 80px; object-fit: contain;" /></div>` : ''}
                         <div style="margin-top: 4px; font-size: 10pt; font-weight: bold; text-align: left; color: #1e293b;">${it.question}</div>
                       </td>
                     `;
@@ -874,10 +905,10 @@ export function buildStandardExamHtml(exam, { forPdf = false, isPrint = false } 
         <td style="width: 55%; vertical-align: top;">
           <div style="font-size: 13pt; font-weight: bold; text-transform: uppercase;">${exam.schoolName || 'A AN TRUONG PRIMARY SCHOOL'}</div>
           <div style="margin-top: 8px; font-size: 13pt;">Full name: ..............................................................</div>
-          <div style="margin-top: 4px; font-size: 13pt;">Class: <b>${grade}</b>...... &nbsp;&nbsp;&nbsp;&nbsp; School year: 2025-2026</div>
+          <div style="margin-top: 4px; font-size: 13pt;">Class: <b>${grade}</b>...... &nbsp;&nbsp;&nbsp;&nbsp; School year: ..................</div>
         </td>
         <td style="width: 45%; text-align: center; vertical-align: top;">
-          <div style="font-weight: bold; font-size: 13pt; text-transform: uppercase;">THE FIRST TERM TEST FOR GRADE ${grade}</div>
+          <div style="font-weight: bold; font-size: 13pt; text-transform: uppercase;">${termTestTitle}</div>
           <div style="font-weight: bold; font-size: 11pt; color: #16a34a; text-transform: uppercase; margin-top: 2px;">READING & WRITING TEST</div>
           <div style="font-size: 11pt; font-style: italic; margin-top: 4px;">Time allowed: 30 minutes</div>
         </td>
@@ -924,7 +955,7 @@ export function buildStandardExamHtml(exam, { forPdf = false, isPrint = false } 
                   return `
                     <td style="width: 33.33%; border: 1px solid #000; padding: 5px; vertical-align: top;">
                       <div style="text-align: left; font-weight: bold; font-size: 10.5pt;">${idx + 1}</div>
-                      ${imgSrc ? `<div style="text-align: center; margin: 2px 0;"><img src="${imgSrc}" style="max-height: 85px; max-width: 140px; height: auto;" /></div>` : ''}
+                      ${imgSrc ? `<div style="text-align: center; margin: 2px 0;"><img src="${imgSrc}" width="130" height="85" style="width: 130px; height: 85px; object-fit: contain;" /></div>` : ''}
                       <div style="margin-top: 4px; font-size: 10.5pt; font-weight: bold;">
                         ${it.caption || it.statement} &nbsp;
                         <span style="display: inline-block; width: 18px; height: 18px; border: 1.5px solid #000; vertical-align: middle;"></span>
@@ -942,7 +973,7 @@ export function buildStandardExamHtml(exam, { forPdf = false, isPrint = false } 
                     return `
                       <td style="width: 50%; border: 1px solid #000; padding: 5px; vertical-align: top;">
                         <div style="text-align: left; font-weight: bold; font-size: 10.5pt;">${idx + 4}</div>
-                        ${imgSrc ? `<div style="text-align: center; margin: 2px 0;"><img src="${imgSrc}" style="max-height: 85px; max-width: 140px; height: auto;" /></div>` : ''}
+                        ${imgSrc ? `<div style="text-align: center; margin: 2px 0;"><img src="${imgSrc}" width="130" height="85" style="width: 130px; height: 85px; object-fit: contain;" /></div>` : ''}
                         <div style="margin-top: 4px; font-size: 10.5pt; font-weight: bold;">
                           ${it.caption || it.statement} &nbsp;
                           <span style="display: inline-block; width: 18px; height: 18px; border: 1.5px solid #000; vertical-align: middle;"></span>
@@ -1020,7 +1051,7 @@ export function buildStandardExamHtml(exam, { forPdf = false, isPrint = false } 
                   return `
                     <td style="width: 20%; border: 1px solid #000; padding: 4px; vertical-align: top; background-color: #fafafa;">
                       <div style="text-align: left; font-weight: bold; font-size: 10pt; color: #7e22ce;">(${idx + 1})</div>
-                      ${imgSrc ? `<div style="text-align: center; margin: 2px 0;"><img src="${imgSrc}" style="max-height: 70px; max-width: 100px; height: auto;" /></div>` : ''}
+                      ${imgSrc ? `<div style="text-align: center; margin: 2px 0;"><img src="${imgSrc}" width="100" height="70" style="width: 100px; height: 70px; object-fit: contain;" /></div>` : ''}
                     </td>
                   `;
                 }).join('')}
@@ -1048,7 +1079,7 @@ export function buildStandardExamHtml(exam, { forPdf = false, isPrint = false } 
                   return `
                     <td style="width: 25%; border: 1px solid #000; padding: 5px; vertical-align: top; background-color: #fafafa;">
                       <div style="text-align: left; font-weight: bold; font-size: 10.5pt; color: #7e22ce;">${circleNums[idx]}</div>
-                      ${imgSrc ? `<div style="text-align: center; margin: 2px 0;"><img src="${imgSrc}" style="max-height: 80px; max-width: 120px; height: auto;" /></div>` : ''}
+                      ${imgSrc ? `<div style="text-align: center; margin: 2px 0;"><img src="${imgSrc}" width="120" height="80" style="width: 120px; height: 80px; object-fit: contain;" /></div>` : ''}
                       <div style="margin-top: 4px; font-family: monospace; font-weight: bold; font-size: 11pt; color: #581c87;">${it.clue || it.questionText || ''}</div>
                       <div style="margin-top: 6px; border-bottom: 1px dotted #000; height: 16px;"></div>
                       <div style="margin-top: 4px; border-bottom: 1px dotted #000; height: 16px;"></div>
@@ -1100,7 +1131,7 @@ export function buildStandardExamHtml(exam, { forPdf = false, isPrint = false } 
     <div style="text-align: center; margin-bottom: 16px;">
       <div style="font-size: 13pt; font-weight: bold; text-transform: uppercase;">${exam.schoolName || 'A AN TRUONG PRIMARY SCHOOL'}</div>
       <div style="font-size: 14pt; font-weight: bold; margin-top: 4px;">${exam.teacherGuide?.title || 'ANSWER KEYS & AUDIO TRANSCRIPTS'}</div>
-      <div style="font-style: italic; font-size: 12pt;">School year: 2025 - 2026 - Grade: ${grade}</div>
+      <div style="font-style: italic; font-size: 12pt;">School year: .................. - Grade: ${grade}</div>
     </div>
 
     <!-- AUDIO TRANSCRIPT CHO GIÁO VIÊN -->
@@ -1166,20 +1197,8 @@ export function buildStandardExamHtml(exam, { forPdf = false, isPrint = false } 
       </div>
     ` : ''}
     `;
-
-    docHtml += `
-    </body>
-    </html>
-    `;
-
-    if (forPdf) {
-      return docHtml;
-    }
-
-    return imgCollector.hasImages()
-      ? imgCollector.buildMhtml(docHtml)
-      : docHtml;
   }
+  else
 
   // ==================== B. TRƯỜNG HỢP MÔN TIẾNG VIỆT (CHUẨN 2 PHIẾU ĐỌC & VIẾT) ====================
   if (isTiengViet) {
@@ -1240,12 +1259,12 @@ export function buildStandardExamHtml(exam, { forPdf = false, isPrint = false } 
   <!-- I. ĐỌC THÀNH TIẾNG (QUY TẮC SƯ PHẠM: CHỈ IN TỰA BÀI + TRANG ĐỌC) -->
   <div class="font-bold" style="font-size: 14pt; margin-top: 8px;">I. ĐỌC THÀNH TIẾNG (${oralScore.toFixed(1).replace('.', ',')} điểm)</div>
   <p style="font-style: italic; margin: 4px 0 8px 0; font-size: 13pt;">
-    * Học sinh bốc thăm đọc thành tiếng một đoạn văn/thơ từ bộ sách Tiếng Việt ${grade} (bộ sách Kết nối tri thức với cuộc sống) và trả lời câu hỏi đọc hiểu của thầy cô:
+    * Học sinh bốc thăm đọc thành tiếng một đoạn văn/thơ từ bộ sách Tiếng Việt ${grade} (bộ sách Chân trời sáng tạo) và trả lời câu hỏi đọc hiểu của thầy cô:
   </p>
   <table class="border-table" style="width: 100%; margin-bottom: 14px;">
     <tr style="background-color: #f1f5f9; font-size: 13pt;" class="font-bold text-center">
       <td style="width: 10%;">STT</td>
-      <td style="width: 55%;">Tên bài đọc tham khảo (SGK Kết nối tri thức với cuộc sống)</td>
+      <td style="width: 55%;">Tên bài đọc tham khảo (SGK Chân trời sáng tạo)</td>
       <td style="width: 35%;">Trang & Tập sách</td>
     </tr>
     ${oralItems.map((item, idx) => `
@@ -1463,7 +1482,7 @@ export function buildStandardExamHtml(exam, { forPdf = false, isPrint = false } 
         <b>Câu ${idx + 1} (${q.points} đ - Mức ${q.level}):</b> ${q.questionText}
         ${(q.image || q.imageUrl || q.imageKey) ? `
           <div style="text-align: center; margin: 4px 0;">
-            <img src="${getWordImgSrc(q)}" style="max-height: 120px; max-width: 260px; height: auto;" />
+            <img src="${getWordImgSrc(q)}" width="220" height="120" style="width: 220px; height: 120px; object-fit: contain;" />
           </div>
         ` : ''}
         ${q.options && q.options.length > 0 ? `
@@ -1472,7 +1491,7 @@ export function buildStandardExamHtml(exam, { forPdf = false, isPrint = false } 
               ${q.options.map(opt => `
                 <td style="border: none; padding: 2px 6px; vertical-align: top;">
                   <b>${opt.id}.</b> ${opt.text || ''}
-                  ${(opt.image || opt.imageKey) ? `<div style="margin-top: 3px;"><img src="${getWordImgSrc(opt)}" style="max-height: 80px; max-width: 120px; height: auto;" /></div>` : ''}
+                  ${(opt.image || opt.imageKey) ? `<div style="margin-top: 3px;"><img src="${getWordImgSrc(opt)}" width="110" height="70" style="width: 110px; height: 70px; object-fit: contain;" /></div>` : ''}
                 </td>
               `).join('')}
             </tr>
@@ -1498,7 +1517,7 @@ export function buildStandardExamHtml(exam, { forPdf = false, isPrint = false } 
         <b>Câu ${mcQuestions.length + idx + 1} (${q.points} đ - Mức ${q.level}):</b> ${q.questionText}
         ${(q.image || q.imageUrl || q.imageKey) ? `
           <div style="text-align: center; margin: 6px 0;">
-            <img src="${getWordImgSrc(q)}" style="max-height: 140px; max-width: 300px; height: auto;" />
+            <img src="${getWordImgSrc(q)}" width="240" height="130" style="width: 240px; height: 130px; object-fit: contain;" />
           </div>
         ` : ''}
         <div style="font-style: italic; font-size: 11pt; margin-top: 4px;">Bài làm:</div>
@@ -1840,7 +1859,7 @@ export function buildStandardExamHtml(exam, { forPdf = false, isPrint = false } 
         </div>
         <table class="border-table" style="margin-top: 4px;">
           <tr style="background-color: #f1f5f9;" class="font-bold text-center">
-            <td style="width: 38%;">Bài đọc tham khảo (SGK Kết nối tri thức - Chuẩn TT27)</td>
+            <td style="width: 38%;">Bài đọc tham khảo (SGK Chân trời sáng tạo - Chuẩn TT27)</td>
             <td style="width: 31%;">Câu hỏi giáo viên nêu cho học sinh</td>
             <td style="width: 31%;">Gợi ý câu trả lời & Chấm điểm</td>
           </tr>
@@ -1990,21 +2009,11 @@ export async function exportExamToWordDoc(exam) {
   const grade = exam.grade || 4;
   const setSuffix = exam.examSetIndex ? `_BoDe${exam.examSetIndex}` : '';
   const filename = isEnglish
-    ? `De_Kiem_Tra_Tieng_Anh_Lop${grade}_Chuan_Global_Success${setSuffix}.docx`
-    : `De_Kiem_Tra_${exam.subject || 'Mon'}_Lop${grade}_Chuan_ND30${setSuffix}.docx`;
+    ? `De_Kiem_Tra_Tieng_Anh_Lop${grade}_Chuan_Global_Success${setSuffix}.doc`
+    : `De_Kiem_Tra_${exam.subject || 'Mon'}_Lop${grade}_Chuan_ND30${setSuffix}.doc`;
 
   const finalDoc = buildStandardExamHtml(exam, { forPdf: false });
-
-  if (typeof window !== 'undefined' && window.IntegrationService && typeof window.IntegrationService.downloadWordBlob === 'function') {
-    try {
-      await window.IntegrationService.downloadWordBlob(finalDoc, filename);
-      return;
-    } catch (e) {
-      console.warn("downloadWordBlob error, falling back to downloadWordHtml:", e);
-    }
-  }
-
-  downloadWordHtml(finalDoc, filename);
+  await downloadWordHtml(finalDoc, filename);
 }
 
 export function exportExamToPdfPrint(exam) {
@@ -2020,12 +2029,24 @@ export function exportExamToPdfPrint(exam) {
     printWindow.document.write(html);
     printWindow.document.close();
 
-    const doPrint = () => {
+    const doPrint = async () => {
       try {
+        const pDoc = printWindow.document;
+        const images = Array.from(pDoc.images || []);
+        await Promise.all(images.map(img => {
+          if (img.complete && img.naturalWidth !== 0) return Promise.resolve();
+          if (typeof img.decode === 'function') {
+            return img.decode().catch(() => Promise.resolve());
+          }
+          return new Promise(resolve => {
+            img.onload = resolve;
+            img.onerror = resolve;
+          });
+        }));
         printWindow.focus();
         setTimeout(() => {
           printWindow.print();
-        }, 500);
+        }, 200);
       } catch (e) {
         console.error("Lỗi khi mở hộp thoại in:", e);
       }
@@ -2067,7 +2088,12 @@ export function exportExamToPdfPrint(exam) {
  */
 export async function exportExamToPdfFile(exam) {
   if (!exam) return;
-  const html = buildStandardExamHtml(exam, { forPdf: true });
+  let html = buildStandardExamHtml(exam, { forPdf: true });
+  
+  // Clean duplicate and trailing page breaks to prevent blank pages
+  html = html.replace(/(<div[^>]*class="[^"]*page-break[^"]*"[^>]*>\s*<\/div>\s*){2,}/gi, '<div class="page-break"></div>');
+  html = html.replace(/(<div[^>]*class="[^"]*page-break[^"]*"[^>]*>\s*<\/div>\s*)+(?=\s*<\/body>|\s*<\/html>|\s*$)/gi, '');
+
   const subject = exam.subject || 'MonHoc';
   const grade = exam.grade || 1;
   const setSuffix = exam.examSetIndex ? `_BoDe${exam.examSetIndex}` : '';
@@ -2084,53 +2110,108 @@ export async function exportExamToPdfFile(exam) {
 
     if (res.ok) {
       const blob = await res.blob();
-      const url = window.URL.createObjectURL(blob);
-      const a = document.createElement('a');
-      a.href = url;
-      a.download = filename;
-      document.body.appendChild(a);
-      a.click();
-      window.URL.revokeObjectURL(url);
-      document.body.removeChild(a);
-      return;
+      if (blob.size > 20000) {
+        const url = window.URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = filename;
+        document.body.appendChild(a);
+        a.click();
+        window.URL.revokeObjectURL(url);
+        document.body.removeChild(a);
+        return;
+      }
     }
   } catch (err) {
     console.warn("Server PDF export unavailable, generating direct client PDF download...", err);
   }
 
-  // Direct Client-Side PDF Download using html2pdf.js (Tải trực tiếp file .pdf vào máy, KHÔNG mở cửa sổ in)
+  // Client-side PDF export với html2pdf + preloading hình ảnh 100%
   if (typeof window !== 'undefined' && window.html2pdf) {
     const container = document.createElement('div');
-    container.innerHTML = html;
-    container.style.position = 'fixed';
-    container.style.left = '-9999px';
+    container.className = 'pdf-export-container';
+    
+    // Parse body content & styles properly so html2canvas measures document height correctly
+    let bodyContent = html;
+    const bodyMatch = html.match(/<body[^>]*>([\s\S]*)<\/body>/i);
+    if (bodyMatch) {
+      bodyContent = bodyMatch[1];
+    }
+    const styleMatches = html.match(/<style[^>]*>([\s\S]*?)<\/style>/gi) || [];
+    container.innerHTML = styleMatches.join('\n') + bodyContent;
+
+    container.style.position = 'absolute';
+    container.style.left = '0';
     container.style.top = '0';
-    container.style.width = '210mm';
-    container.style.padding = '15px';
-    container.style.background = '#ffffff';
+    container.style.width = '794px';
+    container.style.backgroundColor = '#ffffff';
+    container.style.color = '#000000';
+    container.style.zIndex = '-9999';
+    container.style.pointerEvents = 'none';
+    container.style.boxSizing = 'border-box';
+
     document.body.appendChild(container);
 
-    const opt = {
-      margin:       [8, 8, 8, 8],
-      filename:     filename,
-      image:        { type: 'jpeg', quality: 0.98 },
-      html2canvas:  { scale: 2, useCORS: true, logging: false },
-      jsPDF:        { unit: 'mm', format: 'a4', orientation: 'portrait' }
-    };
-
+    const prevScroll = typeof window.scrollY !== 'undefined' ? window.scrollY : 0;
     try {
-      await window.html2pdf().set(opt).from(container).save();
-      return;
+      if (typeof window.scrollTo === 'function') {
+        window.scrollTo(0, 0);
+      }
+      // Đợi tất cả hình ảnh trong DOM nạp xong 100% trước khi vẽ canvas
+      const images = Array.from(container.querySelectorAll('img'));
+      await Promise.all(images.map(img => {
+        if (img.complete && img.naturalWidth !== 0) return Promise.resolve();
+        if (typeof img.decode === 'function') {
+          return img.decode().catch(() => Promise.resolve());
+        }
+        return new Promise(resolve => {
+          img.onload = resolve;
+          img.onerror = resolve;
+        });
+      }));
+
+      const opt = {
+        margin: [10, 10, 10, 15],
+        filename: filename,
+        image: { type: 'jpeg', quality: 0.98 },
+        html2canvas: {
+          scale: 2,
+          useCORS: true,
+          logging: false,
+          scrollY: 0,
+          scrollX: 0,
+          windowWidth: 794
+        },
+        jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' },
+        pagebreak: { mode: ['css', 'legacy'] }
+      };
+
+      const pdfBlob = await window.html2pdf().set(opt).from(container).output('blob');
+      if (pdfBlob && pdfBlob.size > 20000) {
+        const url = window.URL.createObjectURL(pdfBlob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = filename;
+        document.body.appendChild(a);
+        a.click();
+        window.URL.revokeObjectURL(url);
+        document.body.removeChild(a);
+        return;
+      }
+      console.warn("Client generated PDF size is too small or blank, opening Print window fallback...");
     } catch (hErr) {
-      console.warn("html2pdf direct save failed:", hErr);
+      console.warn("html2pdf save error, using print window fallback:", hErr);
     } finally {
+      if (typeof window.scrollTo === 'function') {
+        window.scrollTo(0, prevScroll);
+      }
       if (container.parentNode) {
         container.parentNode.removeChild(container);
       }
     }
   }
 
-  // Phụ trợ cuối cùng nếu html2pdf chưa nạp xong
+  // Tự động mở cửa sổ in ấn / Lưu dưới dạng PDF chuẩn vector sắc nét 100% không bị lỗi file trắng
   exportExamToPdfPrint(exam);
 }
 

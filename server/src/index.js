@@ -17,6 +17,10 @@ app.use('/api', apiRoutes);
 const clientDistPath = path.join(__dirname, '../../client/dist');
 const clientPublicPath = path.join(__dirname, '../../client/public');
 
+// Ưu tiên phục vụ /images từ client/public/images và client/dist/images
+app.use('/images', express.static(path.join(clientPublicPath, 'images')));
+app.use('/images', express.static(path.join(clientDistPath, 'images')));
+
 // Ưu tiên phục vụ /rag từ client/public/rag
 app.use('/rag', express.static(path.join(clientPublicPath, 'rag')));
 // Fallback /rag từ client/dist/rag nếu có

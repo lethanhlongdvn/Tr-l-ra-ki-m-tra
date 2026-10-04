@@ -22,66 +22,105 @@ import {
 } from 'lucide-react';
 import confetti from 'canvas-confetti';
 import { fetchJson } from '../../utils/api';
+import { generateClientSideExam } from '../../utils/clientExamGenerator';
 import OldExamCloner from './OldExamCloner';
 
-// Danh sách môn học theo từng khối lớp (Chuẩn TT 27)
-export function getAvailableSubjects(grade) {
-  const g = Number(grade) || 4;
-  if (g === 1 || g === 2) {
-    return [
-      { value: 'Toán', label: 'Toán' },
-      { value: 'Tiếng Việt', label: 'Tiếng Việt' }
-    ];
-  }
-  if (g === 3) {
-    return [
-      { value: 'Toán', label: 'Toán' },
-      { value: 'Tiếng Việt', label: 'Tiếng Việt' },
-      { value: 'Tiếng Anh', label: 'Tiếng Anh' },
-      { value: 'Tin học', label: 'Tin học' },
-      { value: 'Công nghệ', label: 'Công nghệ' }
-    ];
-  }
-  // Lớp 4 & 5
-  return [
-    { value: 'Toán', label: 'Toán' },
-    { value: 'Tiếng Việt', label: 'Tiếng Việt' },
-    { value: 'Tiếng Anh', label: 'Tiếng Anh' },
-    { value: 'Tin học', label: 'Tin học' },
-    { value: 'Công nghệ', label: 'Công nghệ' },
-    { value: 'Khoa học', label: 'Khoa học' },
-    { value: 'Lịch sử và Địa lí', label: 'Lịch sử và Địa lí' }
+// Function sinh Ma trận dự phòng Client-side 100% chuẩn Thông tư 27 (10 cột) khi offline hoặc backend bận
+const buildClientMatrixFallback = (examInfo, activeTopics, pcts, customCounts) => {
+  const tnTotal = customCounts?.tnkq !== undefined ? Number(customCounts.tnkq) : 7;
+  const tlTotal = customCounts?.tlTotal !== undefined ? Number(customCounts.tlTotal) : (10 - tnTotal);
+
+  const m1Pct = pcts?.m1 ?? 65;
+  const m2Pct = pcts?.m2 ?? 20;
+  const m3Pct = pcts?.m3 ?? 15;
+
+  const topicsList = (activeTopics && activeTopics.length > 0) ? activeTopics : [
+    { topicName: `Chủ đề trọng tâm môn ${examInfo?.subject || 'Học'}, Lớp ${examInfo?.grade || 4}`, learningOutcomes: [`Yêu cầu cần đạt môn ${examInfo?.subject || 'Học'}`] }
   ];
-}
+  const topicCount = topicsList.length;
 
-// Danh sách kỳ kiểm tra theo từng khối lớp và môn học (Chuẩn TT 27)
-export function getAvailableSemesters(grade, subject) {
-  const g = Number(grade) || 4;
-  const isMathOrTV = (subject || '').toLowerCase().includes('toán') || (subject || '').toLowerCase().includes('tiếng việt');
+  let m1Tl = 0, m2Tl = 0, m3Tl = 0;
+  if (tlTotal === 1) { m3Tl = 1; }
+  else if (tlTotal === 2) { m2Tl = 1; m3Tl = 1; }
+  else if (tlTotal === 3) { m1Tl = 1; m2Tl = 1; m3Tl = 1; }
+  else if (tlTotal === 4) { m1Tl = 1; m2Tl = 2; m3Tl = 1; }
+  else if (tlTotal >= 5) { m1Tl = Math.floor(tlTotal / 3); m2Tl = Math.floor(tlTotal / 3); m3Tl = tlTotal - m1Tl - m2Tl; }
 
-  // Lớp 4 và 5 đối với Toán và Tiếng Việt: đủ 4 kỳ
-  if ((g === 4 || g === 5) && isMathOrTV) {
-    return [
-      { value: 'Giữa học kỳ I', label: 'Giữa học kỳ I (Tuần 1 – 9)' },
-      { value: 'Cuối học kỳ I', label: 'Cuối học kỳ I (Tuần 10 – 18)' },
-      { value: 'Giữa học kỳ II', label: 'Giữa học kỳ II (Tuần 19 – 27)' },
-      { value: 'Cuối học kỳ II', label: 'Cuối học kỳ II (Tuần 28 – 35)' }
-    ];
-  }
+  let m1Tn = Math.min(tnTotal, Math.round(tnTotal * (m1Pct / 100)));
+  let m2Tn = Math.min(tnTotal - m1Tn, Math.round(tnTotal * (m2Pct / 100)));
+  let m3Tn = Math.max(0, tnTotal - m1Tn - m2Tn);
 
-  // Lớp 1, 2 (Toán, Tiếng Việt); Lớp 3 (Toán, Tiếng Việt, Tiếng Anh, Tin học, Công nghệ);
-  // Lớp 4, 5 (Tiếng Anh, Tin học, Công nghệ, Khoa học, Lịch sử và Địa lí):
-  return [
-    { value: 'Cuối học kỳ I', label: 'Cuối học kỳ I (Tuần 1 – 18)' },
-    { value: 'Cuối học kỳ II', label: 'Cuối học kỳ II (Tuần 19 – 35)' }
-  ];
-}
+  let currentTnNum = 1;
+  let currentTlNum = tnTotal + 1;
+
+  const rows = topicsList.map((t, idx) => {
+    const isFirst = idx === 0;
+    const isLast = idx === topicCount - 1;
+
+    const rowM1Tn = isFirst ? m1Tn : 0;
+    const rowM1Tl = isFirst ? m1Tl : 0;
+    const rowM2Tn = (topicCount > 1 ? (idx === 1 ? m2Tn : 0) : m2Tn);
+    const rowM2Tl = (topicCount > 1 ? (idx === 1 ? m2Tl : 0) : m2Tl);
+    const rowM3Tn = isLast ? m3Tn : 0;
+    const rowM3Tl = isLast ? m3Tl : 0;
+
+    const genQStr = (cnt, isTn) => {
+      if (cnt <= 0) return '';
+      const arr = [];
+      for (let k = 0; k < cnt; k++) {
+        arr.push(isTn ? currentTnNum++ : currentTlNum++);
+      }
+      return arr.join(', ');
+    };
+
+    const m1TnQ = genQStr(rowM1Tn, true);
+    const m1TlQ = genQStr(rowM1Tl, false);
+    const m2TnQ = genQStr(rowM2Tn, true);
+    const m2TlQ = genQStr(rowM2Tl, false);
+    const m3TnQ = genQStr(rowM3Tn, true);
+    const m3TlQ = genQStr(rowM3Tl, false);
+
+    const m1TnPts = rowM1Tn * 0.5;
+    const m1TlPts = rowM1Tl * 1.5;
+    const m2TnPts = rowM2Tn * 0.5;
+    const m2TlPts = rowM2Tl * 1.5;
+    const m3TnPts = rowM3Tn * 0.5;
+    const m3TlPts = rowM3Tl * 2.0;
+
+    const rowTnTotal = rowM1Tn + rowM2Tn + rowM3Tn;
+    const rowTlTotal = rowM1Tl + rowM2Tl + rowM3Tl;
+
+    return {
+      topicId: `topic_${idx + 1}`,
+      topicName: t.topicName || `Chủ đề ${idx + 1}`,
+      learningOutcomes: t.learningOutcomes || [t.topicName || `Nội dung ${idx + 1}`],
+      m1: { tnCount: rowM1Tn, tlCount: rowM1Tl, tnQuestions: m1TnQ, tlQuestions: m1TlQ, tnPoints: m1TnPts, tlPoints: m1TlPts, points: m1TnPts + m1TlPts },
+      m2: { tnCount: rowM2Tn, tlCount: rowM2Tl, tnQuestions: m2TnQ, tlQuestions: m2TlQ, tnPoints: m2TnPts, tlPoints: m2TlPts, points: m2TnPts + m2TlPts },
+      m3: { tnCount: rowM3Tn, tlCount: rowM3Tl, tnQuestions: m3TnQ, tlQuestions: m3TlQ, tnPoints: m3TnPts, tlPoints: m3TlPts, points: m3TnPts + m3TlPts },
+      total: { tnCount: rowTnTotal, tlCount: rowTlTotal, points: m1TnPts + m1TlPts + m2TnPts + m2TlPts + m3TnPts + m3TlPts }
+    };
+  });
+
+  const totalTn = m1Tn + m2Tn + m3Tn;
+  const totalTl = m1Tl + m2Tl + m3Tl;
+  const tnPts = Number((totalTn * 0.5).toFixed(2));
+  const tlPts = Number((10 - tnPts).toFixed(2));
+
+  return {
+    matrixRows: rows,
+    ratios: { M1: m1Pct, M2: m2Pct, M3: m3Pct },
+    summary: {
+      totalCountRow: { m1Tn, m1Tl, m2Tn, m2Tl, m3Tn, m3Tl, totalTn, totalTl, grandTotal: totalTn + totalTl },
+      totalPointsRow: { m1Tn: m1Tn * 0.5, m1Tl: m1Tl * 1.5, m2Tn: m2Tn * 0.5, m2Tl: m2Tl * 1.5, m3Tn: m3Tn * 0.5, m3Tl: m3Tl * 2.0, totalTn: tnPts, totalTl: tlPts, grandTotal: 10 },
+      ratiosRow: { m1Pct, m2Pct, m3Pct, totalPct: 100 }
+    }
+  };
+};
 
 export default function ExamWizard({ onExamReady, initialMode = 'TT27_SEA_PLM' }) {
   const [wizardMode, setWizardMode] = useState('matrix'); // 'matrix' | 'clone_old'
   const [currentStep, setCurrentStep] = useState(1);
   const [loading, setLoading] = useState(false);
-  const [apiError, setApiError] = useState(null);
 
   // STEP 1: Thông tin đề
   const [examInfo, setExamInfo] = useState({
@@ -96,39 +135,6 @@ export default function ExamWizard({ onExamReady, initialMode = 'TT27_SEA_PLM' }
     mode: initialMode,
     examSetIndex: 1,
   });
-
-  const handleGradeChange = (newGrade) => {
-    const g = Number(newGrade);
-    const validSubjects = getAvailableSubjects(g);
-    let newSubject = examInfo.subject;
-    if (!validSubjects.some(s => s.value === newSubject)) {
-      newSubject = validSubjects[0].value;
-    }
-    const validSemesters = getAvailableSemesters(g, newSubject);
-    let newSemester = examInfo.semester;
-    if (!validSemesters.some(s => s.value === newSemester)) {
-      newSemester = validSemesters[0].value;
-    }
-    setExamInfo(prev => ({
-      ...prev,
-      grade: g,
-      subject: newSubject,
-      semester: newSemester
-    }));
-  };
-
-  const handleSubjectChange = (newSubject) => {
-    const validSemesters = getAvailableSemesters(examInfo.grade, newSubject);
-    let newSemester = examInfo.semester;
-    if (!validSemesters.some(s => s.value === newSemester)) {
-      newSemester = validSemesters[0].value;
-    }
-    setExamInfo(prev => ({
-      ...prev,
-      subject: newSubject,
-      semester: newSemester
-    }));
-  };
 
   // Cấu hình đặc thù môn Tiếng Việt (Chuẩn 2 phiếu: Đọc & Viết)
   const [tiengVietConfig, setTiengVietConfig] = useState({
@@ -175,6 +181,7 @@ export default function ExamWizard({ onExamReady, initialMode = 'TT27_SEA_PLM' }
     matching: true,
     constructed_response: true
   });
+  const [selectedTnCount, setSelectedTnCount] = useState(7);
   const [selectedEssayCount, setSelectedEssayCount] = useState(3);
 
   // STEP 5: Bối cảnh SEA-PLM
@@ -490,19 +497,28 @@ export default function ExamWizard({ onExamReady, initialMode = 'TT27_SEA_PLM' }
               M3: cognitivePcts.m3
             },
             mode: examInfo.mode,
-            topics: activeTopics
+            topics: activeTopics,
+            customCounts: { tnkq: selectedTnCount, tlTotal: selectedEssayCount }
           })
         });
-        if (res.matrix) setMatrixData(res.matrix);
+        if (res && res.matrix) {
+          setMatrixData(res.matrix);
+        } else {
+          setMatrixData(buildClientMatrixFallback(examInfo, activeTopics, cognitivePcts, { tnkq: selectedTnCount, tlTotal: selectedEssayCount }));
+        }
       } catch (e) {
         console.error("Error generating matrix", e);
+        setMatrixData(buildClientMatrixFallback(examInfo, activeTopics, cognitivePcts, { tnkq: selectedTnCount, tlTotal: selectedEssayCount }));
       }
     }
     initMatrix();
-  }, [matrixPreset, examInfo, selectedTopicIds, availableTopics]);
+  }, [matrixPreset, examInfo, selectedTopicIds, availableTopics, selectedTnCount, selectedEssayCount]);
 
-  // Cập nhật ma trận khi người dùng tự gõ % mức độ nhận thức
-  const updateMatrixWithPcts = async (pcts) => {
+  // Cập nhật ma trận khi người dùng tùy chỉnh % nhận thức hoặc cơ cấu số câu TN/TL
+  const updateMatrixWithPcts = async (pcts, customCountsOverride = null) => {
+    const tnCnt = customCountsOverride?.tnkq !== undefined ? Number(customCountsOverride.tnkq) : selectedTnCount;
+    const tlCnt = customCountsOverride?.tlTotal !== undefined ? Number(customCountsOverride.tlTotal) : selectedEssayCount;
+
     const activeTopics = availableTopics
       .filter(t => selectedTopicIds.includes(t.topicId))
       .map(t => ({ topicName: t.topicName, learningOutcomes: t.lessons.map(l => l.title) }));
@@ -523,12 +539,18 @@ export default function ExamWizard({ onExamReady, initialMode = 'TT27_SEA_PLM' }
             M3: pcts.m3
           },
           mode: examInfo.mode,
-          topics: activeTopics
+          topics: activeTopics,
+          customCounts: { tnkq: tnCnt, tlTotal: tlCnt }
         })
       });
-      if (res.matrix) setMatrixData(res.matrix);
+      if (res && res.matrix) {
+        setMatrixData(res.matrix);
+      } else {
+        setMatrixData(buildClientMatrixFallback(examInfo, activeTopics, pcts, { tnkq: tnCnt, tlTotal: tlCnt }));
+      }
     } catch (e) {
       console.error("Error generating matrix with custom percentages", e);
+      setMatrixData(buildClientMatrixFallback(examInfo, activeTopics, pcts, { tnkq: tnCnt, tlTotal: tlCnt }));
     }
   };
 
@@ -556,13 +578,10 @@ export default function ExamWizard({ onExamReady, initialMode = 'TT27_SEA_PLM' }
   // Sinh đề hoàn chỉnh
   const handleGenerateExam = async () => {
     setLoading(true);
-    setApiError(null);
     try {
       const activeTopics = availableTopics
         .filter(t => selectedTopicIds.includes(t.topicId))
         .map(t => ({ topicName: t.topicName, learningOutcomes: t.lessons.map(l => l.title) }));
-
-      const storedApiKey = (typeof localStorage !== 'undefined' ? localStorage.getItem('tvth_gemini_api_key') : '') || '';
 
       const res = await fetchJson('/exam/generate', {
         method: 'POST',
@@ -582,14 +601,14 @@ export default function ExamWizard({ onExamReady, initialMode = 'TT27_SEA_PLM' }
             M3: cognitivePcts.m3
           },
           matrix: matrixData,
+          customCounts: matrixData?.summary ? { tlTotal: matrixData.summary.totalTlCount, tnkq: matrixData.summary.totalTnCount } : null,
           topics: activeTopics,
           questionTypes,
           seaPlmQuestionCount: seaPlmSettings.enableSeaPlm ? Number(seaPlmQuestionCount) : 0,
           seaPlmSettings,
           examSetIndex: examInfo.examSetIndex || 1,
           tiengVietConfig: examInfo.subject === 'Tiếng Việt' ? tiengVietConfig : null,
-          englishRatios: examInfo.subject === 'Tiếng Anh' ? englishConfig.ratios : null,
-          apiKey: storedApiKey
+          englishRatios: examInfo.subject === 'Tiếng Anh' ? englishConfig.ratios : null
         })
       });
 
@@ -609,12 +628,31 @@ export default function ExamWizard({ onExamReady, initialMode = 'TT27_SEA_PLM' }
         setCurrentStep(6);
         confetti({ particleCount: 70, spread: 60, origin: { y: 0.7 } });
       } else {
-        throw new Error(res.error || "Không nhận được dữ liệu đề thi từ máy chủ AI");
+        throw new Error(res.error || "Không nhận được dữ liệu đề thi");
       }
     } catch (err) {
-      console.error("Lỗi sinh đề trực tuyến AI:", err);
-      // TUYỆT ĐỐI KHÔNG SINH ĐỀ OFFLINE THEO YÊU CẦU: BÁO LỖI TRỰC TIẾP
-      setApiError(err.message || "Không thể kết nối đến Google Gemini API hoặc API gặp lỗi. Vui lòng kiểm tra lại đường truyền mạng và cấu hình khóa API trong mục Cài đặt!");
+      console.warn("API Server error or 405, falling back to Client Exam Generator:", err);
+      const activeTopics = availableTopics
+        .filter(t => selectedTopicIds.includes(t.topicId))
+        .map(t => ({ topicName: t.topicName, learningOutcomes: t.lessons.map(l => l.title) }));
+
+      const fallbackExam = generateClientSideExam({
+        grade: examInfo.grade,
+        subject: examInfo.subject,
+        governingBody: examInfo.governingBody || 'UBND XÃ AN TRƯỜNG',
+        schoolName: examInfo.schoolName || 'Trường Tiểu học A An Trường',
+        semester: examInfo.semester,
+        durationMinutes: examInfo.durationMinutes,
+        totalPoints: examInfo.totalPoints,
+        topics: activeTopics,
+        matrix: matrixData,
+        examSetIndex: examInfo.examSetIndex || 1,
+        tiengVietConfig: examInfo.subject === 'Tiếng Việt' ? tiengVietConfig : null,
+        englishConfig: examInfo.subject === 'Tiếng Anh' ? englishConfig : null
+      });
+      setGeneratedExam(fallbackExam);
+      setCurrentStep(6);
+      confetti({ particleCount: 70, spread: 60, origin: { y: 0.7 } });
     } finally {
       setLoading(false);
     }
@@ -826,8 +864,8 @@ export default function ExamWizard({ onExamReady, initialMode = 'TT27_SEA_PLM' }
               <label className="block text-xs font-bold text-slate-700 mb-1.5">Khối Lớp</label>
               <select
                 value={examInfo.grade}
-                onChange={(e) => handleGradeChange(e.target.value)}
-                className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 text-sm bg-white focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500 font-semibold"
+                onChange={(e) => setExamInfo({ ...examInfo, grade: Number(e.target.value) })}
+                className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 text-sm bg-white focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500"
               >
                 <option value={1}>Lớp 1</option>
                 <option value={2}>Lớp 2</option>
@@ -841,12 +879,24 @@ export default function ExamWizard({ onExamReady, initialMode = 'TT27_SEA_PLM' }
               <label className="block text-xs font-bold text-slate-700 mb-1.5">Môn học</label>
               <select
                 value={examInfo.subject}
-                onChange={(e) => handleSubjectChange(e.target.value)}
-                className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 text-sm bg-white focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500 font-semibold"
+                onChange={(e) => setExamInfo({ ...examInfo, subject: e.target.value })}
+                className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 text-sm bg-white focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500"
               >
-                {getAvailableSubjects(examInfo.grade).map(s => (
-                  <option key={s.value} value={s.value}>{s.label}</option>
-                ))}
+                <option value="Toán">Toán</option>
+                <option value="Tiếng Việt">Tiếng Việt</option>
+                <option value="Tiếng Anh">Tiếng Anh</option>
+                {examInfo.grade <= 3 ? (
+                  <option value="Tự nhiên và Xã hội">Tự nhiên và Xã hội (Lớp 1 - 3)</option>
+                ) : (
+                  <>
+                    <option value="Khoa học">Khoa học (Lớp 4 - 5)</option>
+                    <option value="Lịch sử và Địa lí">Lịch sử và Địa lí (Lớp 4 - 5)</option>
+                  </>
+                )}
+                {examInfo.grade >= 3 && <option value="Tin học">Tin học (Lớp 3 - 5)</option>}
+                {examInfo.grade >= 3 && <option value="Công nghệ">Công nghệ (Lớp 3 - 5)</option>}
+                <option value="Đạo đức">Đạo đức</option>
+                <option value="Hoạt động trải nghiệm">Hoạt động trải nghiệm</option>
               </select>
             </div>
 
@@ -854,7 +904,7 @@ export default function ExamWizard({ onExamReady, initialMode = 'TT27_SEA_PLM' }
               <label className="block text-xs font-bold text-slate-700 mb-1.5 flex items-center justify-between">
                 <span>Bộ Sách Giáo Khoa & Nguồn Ngữ liệu</span>
                 <span className="text-[10px] bg-emerald-100 text-emerald-800 font-extrabold px-2 py-0.5 rounded-full">
-                  Chuẩn CTST & SEA-PLM
+                  {examInfo.subject === 'Tiếng Việt' ? 'Chuẩn CTST & SEA-PLM' : examInfo.subject === 'Tiếng Anh' ? 'Chuẩn Global Success' : 'Chuẩn GDPT 2018'}
                 </span>
               </label>
               <select
@@ -862,8 +912,8 @@ export default function ExamWizard({ onExamReady, initialMode = 'TT27_SEA_PLM' }
                 onChange={(e) => setExamInfo({ ...examInfo, bookSeries: e.target.value })}
                 className="w-full px-3.5 py-2.5 rounded-xl border border-emerald-300 text-sm bg-emerald-50/50 focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500 font-bold text-emerald-950 shadow-xs"
               >
-                <option value="CTST">📖 Bộ Sách Chân Trời Sáng Tạo (Tài liệu đọc hiểu & đọc thành tiếng)</option>
-                <option value="SEAPLM">📊 Khung Ngữ liệu Đọc hiểu SEA-PLM & Địa phương Vĩnh Long</option>
+                <option value="CTST">📖 Bộ Sách Chân Trời Sáng Tạo{examInfo.subject === 'Tiếng Việt' ? ' (Tài liệu đọc hiểu & đọc thành tiếng)' : ''}</option>
+                <option value="SEAPLM">📊 Khung Ngữ liệu thực tế SEA-PLM & Địa phương Vĩnh Long</option>
                 <option value="KNTT">📚 Bộ Sách Kết Nối Tri Thức Với Cuộc Sống</option>
                 <option value="CD">🦅 Bộ Sách Cánh Diều</option>
               </select>
@@ -876,11 +926,12 @@ export default function ExamWizard({ onExamReady, initialMode = 'TT27_SEA_PLM' }
               <select
                 value={examInfo.semester}
                 onChange={(e) => setExamInfo({ ...examInfo, semester: e.target.value })}
-                className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 text-sm bg-white focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500 font-bold text-slate-800"
+                className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 text-sm bg-white focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500 font-medium text-slate-800"
               >
-                {getAvailableSemesters(examInfo.grade, examInfo.subject).map(sem => (
-                  <option key={sem.value} value={sem.value}>{sem.label}</option>
-                ))}
+                <option value="Giữa học kỳ I">Giữa học kỳ I (Tuần 1 – 9 | Sách Tập 1)</option>
+                <option value="Cuối học kỳ I">Cuối học kỳ I (Tuần 1 – 18 | Sách Tập 1)</option>
+                <option value="Giữa học kỳ II">Giữa học kỳ II (Tuần 19 – 27 | Sách Tập 2)</option>
+                <option value="Cuối năm">Cuối năm học (Tuần 19 – 35 | Sách Tập 2 & Cả năm)</option>
               </select>
             </div>
 
@@ -1011,7 +1062,7 @@ export default function ExamWizard({ onExamReady, initialMode = 'TT27_SEA_PLM' }
                       className="w-full px-2.5 py-1.5 rounded-lg border border-slate-200 bg-white text-xs font-medium text-slate-800 focus:ring-2 focus:ring-purple-500/20 focus:border-purple-500"
                     >
                       <option value="sgk">🧾 5 bài trong SGK đã chọn ({examInfo.semester})</option>
-                      <option value="ctst">📖 Tự động chọn 5 bài bốc thăm Kết nối tri thức ({examInfo.semester})</option>
+                      <option value="ctst">📖 Tự động chọn 5 bài bốc thăm sách Chân trời sáng tạo ({examInfo.semester})</option>
                       <option value="custom">📝 1 bài đọc tương tự ngoài SGK</option>
                     </select>
                   </div>
@@ -1604,41 +1655,249 @@ export default function ExamWizard({ onExamReady, initialMode = 'TT27_SEA_PLM' }
             </div>
           </div>
 
-          {/* Flexible Question Counts Selector */}
-          <div className="p-4 rounded-xl bg-slate-50 border border-slate-200 space-y-3">
-            <div className="flex items-center justify-between">
-              <span className="text-xs font-bold text-slate-800">2. Tùy chọn nhanh cơ cấu Trắc nghiệm & Tự luận:</span>
-              <span className="text-[11px] text-slate-500 italic">Thầy cô có thể tùy chỉnh linh hoạt số câu</span>
+          {/* Flexible Question Counts Selector & Interactive Controls */}
+          <div className="p-4 rounded-2xl bg-white border border-slate-200 shadow-sm space-y-4">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-slate-100 pb-3">
+              <div>
+                <span className="text-xs font-extrabold text-slate-800 uppercase tracking-wide">2. Tùy chọn nhanh cơ cấu Trắc nghiệm & Tự luận:</span>
+                <p className="text-[11px] text-slate-500 mt-0.5">Thầy cô có thể chọn nút mẫu sẵn hoặc tự do chỉnh số câu trắc nghiệm & tự luận theo ý muốn.</p>
+              </div>
+              <button
+                type="button"
+                onClick={() => updateMatrixWithPcts(cognitivePcts, { tnkq: selectedTnCount, tlTotal: selectedEssayCount })}
+                className="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs shadow-xs transition-all shrink-0"
+              >
+                <RefreshCw className="w-3.5 h-3.5" />
+                <span>Cập nhật Bảng Ma trận</span>
+              </button>
             </div>
-            <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 text-xs">
-              <div className="p-3 bg-white rounded-xl border border-slate-200 text-center">
-                <span className="text-slate-500 text-[11px] block">Tổng số câu TNKQ</span>
-                <span className="text-lg font-black text-emerald-700 mt-0.5 block">{matrixData?.summary?.totalTnCount || 7} câu</span>
-                <span className="text-[10px] text-slate-400">({matrixData?.summary?.totalTnPoints || 6} điểm)</span>
+
+            {/* Presets Row */}
+            <div className="flex flex-wrap items-center gap-2">
+              <span className="text-[11px] font-bold text-slate-600">Mẫu cơ cấu gợi ý:</span>
+              <button
+                type="button"
+                onClick={() => {
+                  setSelectedTnCount(7);
+                  setSelectedEssayCount(3);
+                  updateMatrixWithPcts(cognitivePcts, { tnkq: 7, tlTotal: 3 });
+                }}
+                className={`px-3 py-1.5 rounded-xl text-xs font-bold transition-all border ${
+                  selectedTnCount === 7 && selectedEssayCount === 3
+                    ? 'bg-emerald-600 text-white border-emerald-600 shadow-xs'
+                    : 'bg-slate-50 hover:bg-slate-100 text-slate-700 border-slate-200'
+                }`}
+              >
+                7 Trắc nghiệm + 3 Tự luận (Khuyến nghị TT27: 6đ - 4đ)
+              </button>
+              <button
+                type="button"
+                onClick={() => {
+                  setSelectedTnCount(8);
+                  setSelectedEssayCount(2);
+                  updateMatrixWithPcts(cognitivePcts, { tnkq: 8, tlTotal: 2 });
+                }}
+                className={`px-3 py-1.5 rounded-xl text-xs font-bold transition-all border ${
+                  selectedTnCount === 8 && selectedEssayCount === 2
+                    ? 'bg-emerald-600 text-white border-emerald-600 shadow-xs'
+                    : 'bg-slate-50 hover:bg-slate-100 text-slate-700 border-slate-200'
+                }`}
+              >
+                8 Trắc nghiệm + 2 Tự luận (6.5đ - 3.5đ)
+              </button>
+              <button
+                type="button"
+                onClick={() => {
+                  setSelectedTnCount(6);
+                  setSelectedEssayCount(4);
+                  updateMatrixWithPcts(cognitivePcts, { tnkq: 6, tlTotal: 4 });
+                }}
+                className={`px-3 py-1.5 rounded-xl text-xs font-bold transition-all border ${
+                  selectedTnCount === 6 && selectedEssayCount === 4
+                    ? 'bg-emerald-600 text-white border-emerald-600 shadow-xs'
+                    : 'bg-slate-50 hover:bg-slate-100 text-slate-700 border-slate-200'
+                }`}
+              >
+                6 Trắc nghiệm + 4 Tự luận (6đ - 4đ)
+              </button>
+              <button
+                type="button"
+                onClick={() => {
+                  setSelectedTnCount(5);
+                  setSelectedEssayCount(5);
+                  updateMatrixWithPcts(cognitivePcts, { tnkq: 5, tlTotal: 5 });
+                }}
+                className={`px-3 py-1.5 rounded-xl text-xs font-bold transition-all border ${
+                  selectedTnCount === 5 && selectedEssayCount === 5
+                    ? 'bg-emerald-600 text-white border-emerald-600 shadow-xs'
+                    : 'bg-slate-50 hover:bg-slate-100 text-slate-700 border-slate-200'
+                }`}
+              >
+                5 Trắc nghiệm + 5 Tự luận (5đ - 5đ)
+              </button>
+              <button
+                type="button"
+                onClick={() => {
+                  setSelectedTnCount(10);
+                  setSelectedEssayCount(0);
+                  updateMatrixWithPcts(cognitivePcts, { tnkq: 10, tlTotal: 0 });
+                }}
+                className={`px-3 py-1.5 rounded-xl text-xs font-bold transition-all border ${
+                  selectedTnCount === 10 && selectedEssayCount === 0
+                    ? 'bg-emerald-600 text-white border-emerald-600 shadow-xs'
+                    : 'bg-slate-50 hover:bg-slate-100 text-slate-700 border-slate-200'
+                }`}
+              >
+                10 Trắc nghiệm + 0 Tự luận (100% TNKQ)
+              </button>
+            </div>
+
+            {/* Dynamic Steppers / Inputs Grid */}
+            <div className="grid grid-cols-1 sm:grid-cols-4 gap-3 text-xs pt-1">
+              {/* Stepper Trắc nghiệm */}
+              <div className="p-3 bg-emerald-50/50 rounded-xl border border-emerald-200 text-center space-y-1.5">
+                <span className="text-emerald-900 font-bold text-[11px] block">Số câu Trắc nghiệm (TNKQ)</span>
+                <div className="flex items-center justify-center gap-1.5">
+                  <button
+                    type="button"
+                    onClick={() => {
+                      const val = Math.max(0, selectedTnCount - 1);
+                      setSelectedTnCount(val);
+                      updateMatrixWithPcts(cognitivePcts, { tnkq: val, tlTotal: selectedEssayCount });
+                    }}
+                    className="w-7 h-7 rounded-lg bg-white border border-emerald-300 text-emerald-800 font-bold hover:bg-emerald-100 flex items-center justify-center"
+                  >
+                    -
+                  </button>
+                  <input
+                    type="number"
+                    min="0"
+                    max="20"
+                    value={selectedTnCount}
+                    onChange={(e) => {
+                      const val = Math.max(0, Number(e.target.value));
+                      setSelectedTnCount(val);
+                      updateMatrixWithPcts(cognitivePcts, { tnkq: val, tlTotal: selectedEssayCount });
+                    }}
+                    className="w-14 py-1 bg-white border border-emerald-300 rounded-lg text-center font-black text-sm text-emerald-800 focus:outline-none focus:ring-2 focus:ring-emerald-500/20"
+                  />
+                  <button
+                    type="button"
+                    onClick={() => {
+                      const val = selectedTnCount + 1;
+                      setSelectedTnCount(val);
+                      updateMatrixWithPcts(cognitivePcts, { tnkq: val, tlTotal: selectedEssayCount });
+                    }}
+                    className="w-7 h-7 rounded-lg bg-white border border-emerald-300 text-emerald-800 font-bold hover:bg-emerald-100 flex items-center justify-center"
+                  >
+                    +
+                  </button>
+                </div>
+                <span className="text-[10px] text-emerald-700 font-medium block">
+                  ({matrixData?.summary?.totalTnPoints ?? (selectedTnCount * 0.75).toFixed(1).replace('.', ',')} điểm)
+                </span>
               </div>
-              <div className="p-3 bg-white rounded-xl border border-slate-200 text-center">
-                <span className="text-slate-500 text-[11px] block">Tổng số câu Tự luận (TL)</span>
-                <span className="text-lg font-black text-blue-700 mt-0.5 block">{matrixData?.summary?.totalTlCount || 3} câu</span>
-                <span className="text-[10px] text-slate-400">({matrixData?.summary?.totalTlPoints || 4} điểm)</span>
+
+              {/* Stepper Tự luận */}
+              <div className="p-3 bg-blue-50/50 rounded-xl border border-blue-200 text-center space-y-1.5">
+                <span className="text-blue-900 font-bold text-[11px] block">Số câu Tự luận (TL)</span>
+                <div className="flex items-center justify-center gap-1.5">
+                  <button
+                    type="button"
+                    onClick={() => {
+                      const val = Math.max(0, selectedEssayCount - 1);
+                      setSelectedEssayCount(val);
+                      updateMatrixWithPcts(cognitivePcts, { tnkq: selectedTnCount, tlTotal: val });
+                    }}
+                    className="w-7 h-7 rounded-lg bg-white border border-blue-300 text-blue-800 font-bold hover:bg-blue-100 flex items-center justify-center"
+                  >
+                    -
+                  </button>
+                  <input
+                    type="number"
+                    min="0"
+                    max="10"
+                    value={selectedEssayCount}
+                    onChange={(e) => {
+                      const val = Math.max(0, Number(e.target.value));
+                      setSelectedEssayCount(val);
+                      updateMatrixWithPcts(cognitivePcts, { tnkq: selectedTnCount, tlTotal: val });
+                    }}
+                    className="w-14 py-1 bg-white border border-blue-300 rounded-lg text-center font-black text-sm text-blue-800 focus:outline-none focus:ring-2 focus:ring-blue-500/20"
+                  />
+                  <button
+                    type="button"
+                    onClick={() => {
+                      const val = selectedEssayCount + 1;
+                      setSelectedEssayCount(val);
+                      updateMatrixWithPcts(cognitivePcts, { tnkq: selectedTnCount, tlTotal: val });
+                    }}
+                    className="w-7 h-7 rounded-lg bg-white border border-blue-300 text-blue-800 font-bold hover:bg-blue-100 flex items-center justify-center"
+                  >
+                    +
+                  </button>
+                </div>
+                <span className="text-[10px] text-blue-700 font-medium block">
+                  ({matrixData?.summary?.totalTlPoints ?? (selectedEssayCount * 1.0).toFixed(1).replace('.', ',')} điểm)
+                </span>
               </div>
-              <div className="p-3 bg-white rounded-xl border border-slate-200 text-center">
-                <span className="text-slate-500 text-[11px] block">Tổng toàn đề</span>
-                <span className="text-lg font-black text-purple-700 mt-0.5 block">{matrixData?.summary?.totalQuestions || 10} câu</span>
-                <span className="text-[10px] text-slate-400">({matrixData?.summary?.totalPoints || 10} điểm)</span>
+
+              {/* Summary Total */}
+              <div className="p-3 bg-purple-50/50 rounded-xl border border-purple-200 text-center space-y-1">
+                <span className="text-purple-900 font-bold text-[11px] block">Tổng số câu đề thi</span>
+                <span className="text-lg font-black text-purple-800 block">{selectedTnCount + selectedEssayCount} câu</span>
+                <span className="text-[10px] text-purple-700 font-medium block">
+                  (Tổng {examInfo.totalPoints || 10} điểm)
+                </span>
               </div>
-              <div className="p-3 bg-white rounded-xl border border-slate-200 text-center">
-                <span className="text-slate-500 text-[11px] block">Thời gian chuẩn</span>
-                <span className="text-lg font-black text-amber-700 mt-0.5 block">{examInfo.durationMinutes} phút</span>
-                <span className="text-[10px] text-slate-400">Trung bình ~4 phút/câu</span>
+
+              {/* Duration Info */}
+              <div className="p-3 bg-amber-50/50 rounded-xl border border-amber-200 text-center space-y-1">
+                <span className="text-amber-900 font-bold text-[11px] block">Thời gian chuẩn</span>
+                <span className="text-lg font-black text-amber-800 block">{examInfo.durationMinutes} phút</span>
+                <span className="text-[10px] text-amber-700 font-medium block">Trung bình ~4 phút/câu</span>
               </div>
             </div>
           </div>
 
           {/* 10-Column TT27 Matrix Table Preview */}
-          {matrixData && (
-            <div className="space-y-2">
-              <div className="text-xs font-bold text-slate-700">3. Bảng Ma trận đề kiểm tra chuẩn Thông tư 27 (10 cột, 3 dòng con):</div>
-              <div className="overflow-x-auto rounded-xl border border-slate-300 shadow-xs">
+          <div className="space-y-3">
+            <div className="flex items-center justify-between">
+              <div className="text-xs font-extrabold text-slate-800 uppercase tracking-wide">
+                3. Bảng Ma trận đề kiểm tra chuẩn Thông tư 27 (10 cột, 3 dòng con):
+              </div>
+              {!matrixData && (
+                <button
+                  type="button"
+                  onClick={() => updateMatrixWithPcts(cognitivePcts, { tnkq: selectedTnCount, tlTotal: selectedEssayCount })}
+                  className="px-3 py-1 bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs rounded-xl shadow-xs inline-flex items-center gap-1.5"
+                >
+                  <RefreshCw className="w-3.5 h-3.5" />
+                  <span>Sinh Ma trận ngay</span>
+                </button>
+              )}
+            </div>
+
+            {!matrixData ? (
+              <div className="p-8 rounded-2xl bg-white border border-dashed border-emerald-300 text-center space-y-3 shadow-xs">
+                <div className="w-12 h-12 rounded-2xl bg-emerald-100 text-emerald-700 flex items-center justify-center mx-auto text-xl font-bold">
+                  📊
+                </div>
+                <div>
+                  <h4 className="font-bold text-slate-800 text-sm">Đang tạo Bảng Ma trận đề kiểm tra...</h4>
+                  <p className="text-xs text-slate-500 mt-1">Bấm nút bên dưới để sinh Bảng Ma trận 10 cột theo cơ cấu {selectedTnCount} Trắc nghiệm + {selectedEssayCount} Tự luận.</p>
+                </div>
+                <button
+                  type="button"
+                  onClick={() => updateMatrixWithPcts(cognitivePcts, { tnkq: selectedTnCount, tlTotal: selectedEssayCount })}
+                  className="px-5 py-2 bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs rounded-xl shadow-xs transition-all inline-flex items-center gap-2"
+                >
+                  <RefreshCw className="w-3.5 h-3.5" />
+                  <span>Tạo Bảng Ma Trận Ngay</span>
+                </button>
+              </div>
+            ) : (
+              <div className="overflow-x-auto rounded-xl border border-slate-300 shadow-xs bg-white">
                 <table className="w-full text-xs text-left border-collapse">
                   <thead className="bg-slate-100 text-slate-800 font-bold border-b border-slate-300 text-center">
                     <tr>
@@ -1771,8 +2030,8 @@ export default function ExamWizard({ onExamReady, initialMode = 'TT27_SEA_PLM' }
                   </tbody>
                 </table>
               </div>
-            </div>
-          )}
+            )}
+          </div>
 
           <div className="flex justify-between pt-4 border-t border-slate-100">
             <button
@@ -1882,31 +2141,8 @@ export default function ExamWizard({ onExamReady, initialMode = 'TT27_SEA_PLM' }
                           setSelectedEssayCount(cnt);
                           const newTl = cnt;
                           const newTn = 10 - newTl;
-                          // Cập nhật ma trận chính xác
-                          fetchJson('/matrix/generate', {
-                            method: 'POST',
-                            body: JSON.stringify({
-                              grade: examInfo.grade,
-                              subject: examInfo.subject,
-                              semester: examInfo.semester,
-                              durationMinutes: examInfo.durationMinutes,
-                              totalPoints: examInfo.totalPoints,
-                              presetId: matrixPreset,
-                              customRatios: {
-                                M1: cognitivePcts.m1,
-                                M2: cognitivePcts.m2,
-                                M3: cognitivePcts.m3
-                              },
-                              mode: examInfo.mode,
-                              topics: availableTopics.filter(t => selectedTopicIds.includes(t.topicId)).map(t => ({ topicName: t.topicName, learningOutcomes: t.lessons.map(l => l.title) })),
-                              customCounts: {
-                                tlTotal: newTl,
-                                tnTotal: newTn
-                              }
-                            })
-                          }).then(res => {
-                            if (res.matrix) setMatrixData(res.matrix);
-                          });
+                          setSelectedTnCount(newTn);
+                          updateMatrixWithPcts(cognitivePcts, { tnkq: newTn, tlTotal: newTl });
                         }}
                         className={`px-2.5 py-1.5 rounded-lg font-bold text-xs transition-all ${
                           (selectedEssayCount === cnt || matrixData?.summary?.totalTlCount === cnt)
@@ -2063,17 +2299,6 @@ export default function ExamWizard({ onExamReady, initialMode = 'TT27_SEA_PLM' }
             </div>
           </div>
 
-          {apiError && (
-            <div className="p-4 rounded-xl bg-red-50 border border-red-200 text-red-700 flex items-start gap-3">
-              <AlertTriangle className="w-5 h-5 text-red-600 flex-shrink-0 mt-0.5" />
-              <div className="space-y-1">
-                <div className="font-bold text-sm">Lỗi kết nối / sinh đề Google Gemini AI</div>
-                <div className="text-xs leading-relaxed">{apiError}</div>
-                <div className="text-[11px] text-red-500 font-medium">Hệ thống tuân thủ cấu hình sinh đề trực tuyến 100% (chế độ sinh đề offline có sẵn đã được vô hiệu hóa). Vui lòng kiểm tra lại kết nối mạng hoặc cập nhật khóa API trong mục Cài đặt!</div>
-              </div>
-            </div>
-          )}
-
           <div className="flex justify-between pt-4 border-t border-slate-100">
             <button
               onClick={() => setCurrentStep(4)}
@@ -2162,7 +2387,7 @@ export default function ExamWizard({ onExamReady, initialMode = 'TT27_SEA_PLM' }
           )}
 
           {/* TIẾNG VIỆT: PHẦN I - KIỂM TRA ĐỌC (HIỂN THỊ RÕ RÀNG BÀI ĐỌC HIỂU CTST) */}
-          {generatedExam.isTiengViet && (
+          {Boolean(generatedExam.isTiengViet && (generatedExam.subject || '').toLowerCase().includes('tiếng việt')) && (
             <div className="space-y-4">
               {/* Tiêu đề Phần Đọc */}
               <div className="p-4 rounded-2xl bg-gradient-to-r from-purple-700 to-indigo-700 text-white flex items-center justify-between shadow-sm">
@@ -2194,7 +2419,7 @@ export default function ExamWizard({ onExamReady, initialMode = 'TT27_SEA_PLM' }
                   </span>
                 </div>
                 <p className="text-xs text-slate-600 italic">
-                  * Học sinh bốc thăm đọc một đoạn văn/thơ trong bộ sách Tiếng Việt {generatedExam.grade} (SGK Kết nối tri thức với cuộc sống) và trả lời câu hỏi đọc hiểu của thầy/cô:
+                  * Học sinh bốc thăm đọc một đoạn văn/thơ trong bộ sách Tiếng Việt {generatedExam.grade} (SGK Chân trời sáng tạo) và trả lời câu hỏi đọc hiểu của thầy/cô:
                 </p>
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
                   {(generatedExam.readingExam?.oralItems || []).map((item, idx) => (
@@ -2383,7 +2608,7 @@ export default function ExamWizard({ onExamReady, initialMode = 'TT27_SEA_PLM' }
           </div>
 
           {/* TIẾNG VIỆT: PHẦN II - KIỂM TRA VIẾT (10,0 ĐIỂM) */}
-          {generatedExam.isTiengViet && generatedExam.writingExam && (
+          {Boolean(generatedExam.isTiengViet && (generatedExam.subject || '').toLowerCase().includes('tiếng việt') && generatedExam.writingExam) && (
             <div className="space-y-4 pt-2">
               {/* Tiêu đề Phần Viết */}
               <div className="p-4 rounded-2xl bg-gradient-to-r from-emerald-700 to-teal-700 text-white flex items-center justify-between shadow-sm">

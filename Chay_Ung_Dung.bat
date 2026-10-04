@@ -1,45 +1,30 @@
-﻿@echo off
+@echo off
 chcp 65001 > nul
-title AI EXAM BUILDER - TRO LY THIET KE DE KIEM TRA TIEU HOC
+title AI EXAM BUILDER - TRỢ LÝ THIẾT KẾ ĐỀ KIỂM TRA TIỂU HỌC
 color 0A
 echo =========================================================================
-echo    AI EXAM BUILDER - TRO LY AI THIET KE DE KIEM TRA TIEU HOC
-echo    TT27 - GDPT 2018 - MA TRAN - BAN DAC TA - SEA-PLM - VINH LONG
+echo    AI EXAM BUILDER - TRỢ LÝ AI THIẾT KẾ ĐỀ KIỂM TRA TIỂU HỌC
+echo    TT27 • GDPT 2018 • MA TRẬN • BẢN ĐẶC TẢ • SEA-PLM • VĨNH LONG
 echo =========================================================================
 echo.
-
-set "ROOT_DIR=%~dp0"
-
-REM 1. Kiem tra Node.js
-where node >nul 2>nul
-if %errorlevel% neq 0 (
-    echo [LOI] May tinh chua cai dat Node.js!
-    echo Vui long cai dat Node.js truoc khi chay.
-    pause
-    exit /b
-)
-
-REM 2. Kiem tra thu vien server
-if not exist "%ROOT_DIR%server\node_modules" (
-    echo [1/3] Dang cai dat thu vien server...
-    cd /d "%ROOT_DIR%server"
+if not exist "%~dp0server\node_modules\" (
+    echo [!] Chưa tìm thấy thư viện server. Đang tiến hành cài đặt (chỉ cần làm 1 lần)...
+    cd /d "%~dp0server"
     call npm install
 )
 
-REM 3. Kiem tra ban build client
-if not exist "%ROOT_DIR%client\dist\index.html" (
-    echo [2/3] Dang build giao dien client...
-    cd /d "%ROOT_DIR%client"
-    if not exist "%ROOT_DIR%client\node_modules" (
+if not exist "%~dp0client\dist\" (
+    echo [!] Chưa tìm thấy bản build giao diện client. Đang tiến hành cài đặt và build...
+    cd /d "%~dp0client"
+    if not exist "%~dp0client\node_modules\" (
         call npm install
     )
     call npm run build
 )
 
-REM 4. Khoi dong ung dung
 echo.
-echo [3/3] Dang khoi dong may chu tai http://localhost:3001 ...
-cd /d "%ROOT_DIR%server"
+echo [1/2] Đang khởi động máy chủ ứng dụng...
+cd /d "%~dp0server"
 start "" http://localhost:3001
-node src/index.js
+node --watch-path=src src/index.js
 pause

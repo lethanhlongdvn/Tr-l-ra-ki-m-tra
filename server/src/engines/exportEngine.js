@@ -19,7 +19,8 @@ const {
   WidthType,
   AlignmentType,
   BorderStyle,
-  VerticalAlign
+  VerticalAlign,
+  ImageRun
 } = require('docx');
 const ExcelJS = require('exceljs');
 const englishDocxEngine = require('./englishDocxEngine');
@@ -28,6 +29,59 @@ const englishDocxEngine = require('./englishDocxEngine');
 const PAGE_CONTENT_WIDTH = 9355;
 
 class ExportEngine {
+  /**
+   * Tạo ImageRun từ Data URI hoặc image source cho các môn Toán, Tiếng Việt, Khoa học...
+   */
+  createImageRunFromSource(item, maxWidth = 220, maxHeight = 140) {
+    if (!item) return null;
+    let raw = item;
+    if (typeof item === 'object') {
+      raw = item.image || item.imageKey || item.imageUrl || item.src;
+    }
+    if (!raw || typeof raw !== 'string') return null;
+    raw = raw.trim();
+
+    let b64 = '';
+    if (raw.startsWith('data:image')) {
+      b64 = raw;
+    } else {
+      try {
+        const englishImagesBase64 = require('../data/englishImagesBase64.json');
+        if (englishImagesBase64[raw]) {
+          b64 = englishImagesBase64[raw];
+        } else {
+          const normalized = '/' + raw.replace(/^(\.\/|\/|dist\/)+/, '');
+          if (englishImagesBase64[normalized]) {
+            b64 = englishImagesBase64[normalized];
+          } else {
+            const filename = raw.split('/').pop().split('\\').pop();
+            if (englishImagesBase64[filename]) {
+              b64 = englishImagesBase64[filename];
+            } else {
+              const match = Object.keys(englishImagesBase64).find(k => k.endsWith('/' + filename));
+              if (match) b64 = englishImagesBase64[match];
+            }
+          }
+        }
+      } catch (_) {}
+    }
+
+    if (!b64 || !b64.startsWith('data:image')) return null;
+
+    const isJpg = b64.includes('image/jpeg') || b64.includes('image/jpg');
+    const type = isJpg ? 'jpg' : 'png';
+    const cleanB64 = b64.replace(/^data:image\/[a-zA-Z0-9+.-]+;base64,/, '').trim();
+    try {
+      const buffer = Buffer.from(cleanB64, 'base64');
+      return new ImageRun({
+        data: buffer,
+        transformation: { width: maxWidth, height: maxHeight },
+        type
+      });
+    } catch (e) {
+      return null;
+    }
+  }
   /**
    * Tạo bảng Ma trận 10 cột chuẩn Thông tư 27 trong Word (docx) với 3 dòng con (Số câu, Câu số, Số điểm)
    */
@@ -909,17 +963,17 @@ class ExportEngine {
         spacing: { before: 180, after: 60 },
         children: [
           new TextRun({ text: `I. ĐỌC THÀNH TIẾNG (${oralScore} điểm)`, font: "Times New Roman", bold: true, size: 28 }),
-          new TextRun({ text: `\n* Học sinh bốc thăm 1 trong 5 bài đọc Tiếng Việt ${grade} (Bộ sách Kết nối tri thức với cuộc sống theo chuẩn TT27) và trả lời 1 câu hỏi do giáo viên nêu:`, font: "Times New Roman", italics: true, size: 26 })
+          new TextRun({ text: `\n* Học sinh bốc thăm 1 trong 5 bài đọc Tiếng Việt ${grade} (Bộ sách Chân trời sáng tạo theo chuẩn TT27) và trả lời 1 câu hỏi do giáo viên nêu:`, font: "Times New Roman", italics: true, size: 26 })
         ]
       })
     );
 
-    // Bảng 5 bài đọc KNTT: widths = [855, 5500, 3000] => sum = 9355
+    // Bảng 5 bài đọc CTST: widths = [855, 5500, 3000] => sum = 9355
     const oralTableRows = [
       new TableRow({
         children: [
           new TableCell({ width: { size: 855, type: WidthType.DXA }, children: [new Paragraph({ alignment: AlignmentType.CENTER, children: [new TextRun({ text: "STT", font: "Times New Roman", bold: true, size: 26 })] })] }),
-          new TableCell({ width: { size: 5500, type: WidthType.DXA }, children: [new Paragraph({ alignment: AlignmentType.CENTER, children: [new TextRun({ text: "Tên bài đọc tham khảo (Bộ sách Kết nối tri thức với cuộc sống)", font: "Times New Roman", bold: true, size: 26 })] })] }),
+          new TableCell({ width: { size: 5500, type: WidthType.DXA }, children: [new Paragraph({ alignment: AlignmentType.CENTER, children: [new TextRun({ text: "Tên bài đọc tham khảo (Bộ sách Chân trời sáng tạo)", font: "Times New Roman", bold: true, size: 26 })] })] }),
           new TableCell({ width: { size: 3000, type: WidthType.DXA }, children: [new Paragraph({ alignment: AlignmentType.CENTER, children: [new TextRun({ text: "Trang & Tập sách", font: "Times New Roman", bold: true, size: 26 })] })] })
         ]
       })
@@ -1337,7 +1391,7 @@ class ExportEngine {
     const teacherOralTableRows = [
       new TableRow({
         children: [
-          new TableCell({ width: { size: 3500, type: WidthType.DXA }, children: [new Paragraph({ alignment: AlignmentType.CENTER, children: [new TextRun({ text: "Bài đọc tham khảo (SGK Kết nối tri thức - Chuẩn TT27)", font: "Times New Roman", bold: true, size: 26 })] })] }),
+          new TableCell({ width: { size: 3500, type: WidthType.DXA }, children: [new Paragraph({ alignment: AlignmentType.CENTER, children: [new TextRun({ text: "Bài đọc tham khảo (SGK Chân trời sáng tạo - Chuẩn TT27)", font: "Times New Roman", bold: true, size: 26 })] })] }),
           new TableCell({ width: { size: 2877, type: WidthType.DXA }, children: [new Paragraph({ alignment: AlignmentType.CENTER, children: [new TextRun({ text: "Câu hỏi giáo viên hỏi học sinh", font: "Times New Roman", bold: true, size: 26 })] })] }),
           new TableCell({ width: { size: 2978, type: WidthType.DXA }, children: [new Paragraph({ alignment: AlignmentType.CENTER, children: [new TextRun({ text: "Gợi ý câu trả lời đạt điểm tối đa (1,0đ)", font: "Times New Roman", bold: true, size: 26 })] })] })
         ]

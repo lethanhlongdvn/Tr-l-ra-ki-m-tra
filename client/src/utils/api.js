@@ -15,17 +15,8 @@ export async function fetchJson(endpoint, options = {}) {
   });
 
   if (!response.ok) {
-    let errMsg = `HTTP error! status: ${response.status}`;
-    try {
-      const errorData = await response.json();
-      if (errorData && errorData.error) errMsg = errorData.error;
-    } catch (_) {
-      try {
-        const text = await response.text();
-        if (text) errMsg = text.slice(0, 150);
-      } catch (__) {}
-    }
-    throw new Error(errMsg);
+    const errorData = await response.json().catch(() => ({}));
+    throw new Error(errorData.error || `HTTP error! status: ${response.status}`);
   }
 
   return response.json();
@@ -38,7 +29,9 @@ export async function downloadFile(endpoint, body, filename) {
     body: JSON.stringify(body)
   });
 
-  if (!response.ok) {
+  const contentType = response.headers.get('content-type') || '';
+
+  if (!response.ok || contentType.includes('text/html')) {
     let errMsg = `Lỗi máy chủ (${response.status})`;
     try {
       const errorJson = await response.json();
@@ -53,6 +46,10 @@ export async function downloadFile(endpoint, body, filename) {
   }
 
   const blob = await response.blob();
+  if (blob.size < 15000 && filename.toLowerCase().endsWith('.docx')) {
+    throw new Error("Tệp nhận được không hợp lệ, chuyển sang tạo trực tiếp.");
+  }
+
   const url = window.URL.createObjectURL(blob);
   const a = document.createElement('a');
   a.href = url;
@@ -67,19 +64,45 @@ export async function downloadFile(endpoint, body, filename) {
  * Tải file Word (.doc / .docx) trực tiếp từ client (MSO Word HTML)
  * Đảm bảo 100% tương thích và không bao giờ phụ thuộc đường truyền máy chủ
  */
-export function downloadWordHtml(htmlContent, filename) {
-  const isMhtml = typeof htmlContent === 'string' && htmlContent.startsWith('MIME-Version:');
-  const isDocx = (filename || '').toLowerCase().endsWith('.docx');
+export async function downloadWordHtml(htmlContent, filename) {
+  const isMhtml = typeof htmlContent === 'string' && (htmlContent.startsWith('MIME-Version:') || htmlContent.includes('Content-Type: multipart/related'));
+  let finalFilename = filename || 'De_Kiem_Tra.doc';
+  if (isMhtml && finalFilename.toLowerCase().endsWith('.docx')) {
+    finalFilename = finalFilename.replace(/\.docx$/i, '.doc');
+  }
+  const isDocx = finalFilename.toLowerCase().endsWith('.docx');
   const mimeType = isMhtml 
     ? 'message/rfc822;charset=utf-8' 
     : (isDocx ? 'application/vnd.openxmlformats-officedocument.wordprocessingml.document' : 'application/msword;charset=utf-8');
   const blob = new Blob(['\ufeff' + htmlContent], {
     type: mimeType
   });
+
+  if (typeof window !== 'undefined' && typeof window.showSaveFilePicker === 'function') {
+    try {
+      const pickerOpts = {
+        suggestedName: finalFilename,
+        types: [{
+          description: isDocx ? 'Tài liệu Microsoft Word (.docx)' : 'Tài liệu Microsoft Word (.doc)',
+          accept: { [mimeType.split(';')[0]]: [isDocx ? '.docx' : '.doc'] }
+        }]
+      };
+      const handle = await window.showSaveFilePicker(pickerOpts);
+      const writable = await handle.createWritable();
+      await writable.write(blob);
+      await writable.close();
+      return;
+    } catch (err) {
+      if (err && (err.name === 'AbortError' || err.code === 20)) {
+        return;
+      }
+    }
+  }
+
   const url = window.URL.createObjectURL(blob);
   const a = document.createElement('a');
   a.href = url;
-  a.download = isDocx ? filename : (filename.endsWith('.doc') ? filename : `${filename}.docx`);
+  a.download = finalFilename;
   document.body.appendChild(a);
   a.click();
   window.URL.revokeObjectURL(url);

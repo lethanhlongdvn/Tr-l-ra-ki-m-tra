@@ -68,27 +68,17 @@ module.exports = {
 
   // Quy định các đợt kiểm tra theo khối lớp
   examPeriods: {
-    // Lớp 1, 2: Chỉ kiểm tra cuối học kỳ I (tuần 1 - 18) và cuối học kỳ II (tuần 19 - 35) đối với Toán, Tiếng Việt
-    grade1_2: [
-      { id: "end_term_1", name: "Cuối học kỳ I", weeksRange: [1, 18], semester: "Học kỳ 1", volume: 1, requiredSubjects: ["Toán", "Tiếng Việt"] },
-      { id: "end_year", name: "Cuối học kỳ II", weeksRange: [19, 35], semester: "Học kỳ 2", volume: 2, requiredSubjects: ["Toán", "Tiếng Việt"] }
-    ],
-    // Lớp 3: Kiểm tra cuối học kỳ I (tuần 1 - 18) và cuối học kỳ II (tuần 19 - 35) cho Toán, Tiếng Việt, Tiếng Anh, Tin học, Công nghệ
-    grade3: [
+    grade1_3: [
+      { id: "mid_term_1", name: "Giữa học kỳ I", weeksRange: [1, 9], semester: "Học kỳ 1", volume: 1, requiredSubjects: ["Toán", "Tiếng Việt", "Tiếng Anh"] },
       { id: "end_term_1", name: "Cuối học kỳ I", weeksRange: [1, 18], semester: "Học kỳ 1", volume: 1, requiredSubjects: ["Toán", "Tiếng Việt", "Tiếng Anh", "Tin học", "Công nghệ"] },
-      { id: "end_year", name: "Cuối học kỳ II", weeksRange: [19, 35], semester: "Học kỳ 2", volume: 2, requiredSubjects: ["Toán", "Tiếng Việt", "Tiếng Anh", "Tin học", "Công nghệ"] }
+      { id: "mid_term_2", name: "Giữa học kỳ II", weeksRange: [19, 27], semester: "Học kỳ 2", volume: 2, requiredSubjects: ["Toán", "Tiếng Việt", "Tiếng Anh"] },
+      { id: "end_year", name: "Cuối năm học", weeksRange: [19, 35], semester: "Học kỳ 2", volume: 2, requiredSubjects: ["Toán", "Tiếng Việt", "Tiếng Anh", "Tin học", "Công nghệ"] }
     ],
-    // Lớp 4, 5 môn Toán & Tiếng Việt: 4 kỳ (Giữa HK1: 1-9, Cuối HK1: 10-18, Giữa HK2: 19-27, Cuối HK2: 28-35)
-    grade4_5_math_tv: [
+    grade4_5: [
       { id: "mid_term_1", name: "Giữa học kỳ I", weeksRange: [1, 9], semester: "Học kỳ 1", volume: 1, requiredSubjects: ["Toán", "Tiếng Việt"] },
-      { id: "end_term_1", name: "Cuối học kỳ I", weeksRange: [10, 18], semester: "Học kỳ 1", volume: 1, requiredSubjects: ["Toán", "Tiếng Việt"] },
+      { id: "end_term_1", name: "Cuối học kỳ I", weeksRange: [1, 18], semester: "Học kỳ 1", volume: 1, requiredSubjects: ["Toán", "Tiếng Việt", "Khoa học", "Lịch sử và Địa lí", "Tin học", "Công nghệ", "Tiếng Anh"] },
       { id: "mid_term_2", name: "Giữa học kỳ II", weeksRange: [19, 27], semester: "Học kỳ 2", volume: 2, requiredSubjects: ["Toán", "Tiếng Việt"] },
-      { id: "end_year", name: "Cuối học kỳ II", weeksRange: [28, 35], semester: "Học kỳ 2", volume: 2, requiredSubjects: ["Toán", "Tiếng Việt"] }
-    ],
-    // Lớp 4, 5 các môn Tiếng Anh, Tin học, Công nghệ, Khoa học, Lịch sử và Địa lí: 2 kỳ (Cuối HK1: 1-18, Cuối HK2: 19-35)
-    grade4_5_others: [
-      { id: "end_term_1", name: "Cuối học kỳ I", weeksRange: [1, 18], semester: "Học kỳ 1", volume: 1, requiredSubjects: ["Tiếng Anh", "Tin học", "Công nghệ", "Khoa học", "Lịch sử và Địa lí"] },
-      { id: "end_year", name: "Cuối học kỳ II", weeksRange: [19, 35], semester: "Học kỳ 2", volume: 2, requiredSubjects: ["Tiếng Anh", "Tin học", "Công nghệ", "Khoa học", "Lịch sử và Địa lí"] }
+      { id: "end_year", name: "Cuối năm học", weeksRange: [19, 35], semester: "Học kỳ 2", volume: 2, requiredSubjects: ["Toán", "Tiếng Việt", "Khoa học", "Lịch sử và Địa lí", "Tin học", "Công nghệ", "Tiếng Anh"] }
     ]
   },
 

@@ -51,7 +51,7 @@ export default function OldExamCloner({ onExamReady, onBackToNormal }) {
   const sampleMathExamText = `UBND XÃ AN TRƯỜNG
 TRƯỜNG TIỂU HỌC A AN TRƯỜNG
 
-BÀI KIỂM TRA ĐỊNH KỲ CUỐI HỌC KỲ I - NĂM HỌC 2025 - 2026
+BÀI KIỂM TRA ĐỊNH KỲ CUỐI HỌC KỲ I - NĂM HỌC 20... - 20...
 MÔN: TOÁN - LỚP 4
 Thời gian làm bài: 40 phút (Không kể thời gian phát đề)
 
@@ -127,21 +127,34 @@ Câu 8 (1,5 điểm): Tính bằng cách thuận tiện nhất:
     setRawText(sampleMathExamText);
   };
 
+  // Helper đọc file thành chuỗi Base64
+  const fileToBase64 = (file) => new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onload = () => {
+      const res = reader.result;
+      const base64 = typeof res === 'string' ? (res.split(',')[1] || res) : '';
+      resolve(base64);
+    };
+    reader.onerror = (err) => reject(err);
+    reader.readAsDataURL(file);
+  });
+
   // 1. Phân tích tệp hoặc văn bản đề cũ
   const handleParseOldExam = async () => {
     setParsing(true);
     try {
       let res;
       if (activeTab === 'file' && uploadedFile) {
-        // Gửi tệp qua FormData
-        const formData = new FormData();
-        formData.append('file', uploadedFile);
-
-        const response = await fetch('/api/exam/parse-old-file', {
+        // Đọc tệp thành Base64 để truyền qua JSON body an toàn trên cả Local lẫn Vercel Serverless
+        const base64Data = await fileToBase64(uploadedFile);
+        res = await fetchJson('/exam/parse-old-file', {
           method: 'POST',
-          body: formData
+          body: JSON.stringify({
+            base64Data,
+            mimeType: uploadedFile.type || 'application/octet-stream',
+            filename: uploadedFile.name
+          })
         });
-        res = await response.json();
       } else {
         // Gửi nội dung text trực tiếp
         if (!rawText.trim()) {

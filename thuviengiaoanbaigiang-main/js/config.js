@@ -35,8 +35,8 @@ var CONFIG = {
   // 6. Gemini AI API Key mặc định (Mọi khách vào web đều được kết nối AI sẵn 100%):
   DEFAULT_GEMINI_API_KEY: (function() {
     try {
-      var p1 = "QVEuQWI4Uk42SjdOZHVzZGtZNV9o";
-      var p2 = "TnB3NzRfLXJtWldpRUVraXpnMmdMaWNoQmdQaW51emc=";
+      var p1 = "QVEuQWI4Uk42S2JCdWc0WXBCM19j";
+      var p2 = "ZUVNaTItVHFaYURVSVd6R1MxWFk0Nlk0aHBkbkNKemc=";
       var key = typeof atob !== 'undefined' ? atob(p1 + p2) : "";
       if (typeof localStorage !== 'undefined' && key) {
         var old = localStorage.getItem("tvth_gemini_api_key");

@@ -15,24 +15,29 @@ import {
 } from 'lucide-react';
 import { downloadFile, fetchJson } from '../../utils/api';
 import { exportExamToWordDoc, exportExamToPdfFile, exportExamToPdfPrint } from '../../utils/wordHtmlExport';
+import { generateClientSideExam } from '../../utils/clientExamGenerator';
 import englishImagesBase64 from '../../utils/englishImagesBase64.json';
 
 function getEnglishImageSrc(item) {
   if (!item) return '';
-  if (item.image && englishImagesBase64[item.image]) {
-    return englishImagesBase64[item.image];
+  if (typeof item === 'object') {
+    return getEnglishImageSrc(item.image || item.imageKey || item.imageUrl || item.src);
   }
-  if (item.imageKey && englishImagesBase64[item.imageKey]) {
-    return englishImagesBase64[item.imageKey];
-  }
-  if (item.image) {
-    const filename = item.image.split('/').pop();
-    if (englishImagesBase64[filename]) {
-      return englishImagesBase64[filename];
-    }
-    return item.image;
-  }
-  return '';
+  if (typeof item !== 'string') return '';
+  const s = item.trim();
+  if (s.startsWith('data:image')) return s;
+  if (englishImagesBase64[s]) return englishImagesBase64[s];
+
+  const normalized = '/' + s.replace(/^(\.\/|\/|dist\/)+/, '');
+  if (englishImagesBase64[normalized]) return englishImagesBase64[normalized];
+
+  const filename = s.split('/').pop().split('\\').pop();
+  if (englishImagesBase64[filename]) return englishImagesBase64[filename];
+
+  const match = Object.keys(englishImagesBase64).find(k => k.endsWith('/' + filename));
+  if (match) return englishImagesBase64[match];
+
+  return s;
 }
 
 function computeMatrixSummary(matrixRows = [], ratios = {}, totalPoints = 10) {
@@ -285,20 +290,43 @@ export default function ExamPreviewTabs({ exam, onBackToEdit }) {
           customRatios: currentExam.customRatios || currentExam.matrix?.ratios || { M1: 65, M2: 20, M3: 15 },
           presetId: currentExam.matrixPreset || currentExam.presetId || 'tt27_standard',
           matrix: currentExam.matrix,
-          schoolInfo: {
-            schoolName: currentExam.schoolName,
-            governingBody: currentExam.governingBody
-          }
+          schoolName: currentExam.schoolName,
+          governingBody: currentExam.governingBody,
+          tiengVietConfig: currentExam.tiengVietConfig || null
         })
       });
       if (res && res.exam) {
+        res.exam.examSetIndex = newSetIndex;
         setCurrentExam(res.exam);
         setVariants([]);
         setSelectedVariantCode('Gốc');
+        return;
       }
+      throw new Error(res?.error || "Không nhận được dữ liệu từ máy chủ");
     } catch (e) {
-      console.error("Lỗi khi chuyển bộ đề:", e);
-      alert("Lỗi khi chuyển sang bộ đề khác: " + (e.message || e));
+      console.warn("Server API switch error, using Client Generator fallback for set:", newSetIndex, e);
+      try {
+        const fallbackExam = generateClientSideExam({
+          grade: currentExam.grade,
+          subject: currentExam.subject,
+          governingBody: currentExam.governingBody || 'UBND XÃ AN TRƯỜNG',
+          schoolName: currentExam.schoolName || 'Trường Tiểu học A An Trường',
+          semester: currentExam.semester,
+          durationMinutes: currentExam.durationMinutes || 40,
+          totalPoints: currentExam.totalPoints || 10,
+          matrix: currentExam.matrix,
+          examSetIndex: newSetIndex,
+          tiengVietConfig: currentExam.tiengVietConfig || null,
+          englishConfig: currentExam.englishConfig || null
+        });
+        fallbackExam.examSetIndex = newSetIndex;
+        setCurrentExam(fallbackExam);
+        setVariants([]);
+        setSelectedVariantCode('Gốc');
+      } catch (fallbackErr) {
+        console.error("Client fallback failed:", fallbackErr);
+        alert("Lỗi khi chuyển sang bộ đề khác: " + (fallbackErr.message || fallbackErr));
+      }
     } finally {
       setIsSwitchingSet(false);
     }
@@ -369,17 +397,40 @@ export default function ExamPreviewTabs({ exam, onBackToEdit }) {
       const res = await fetchJson('/exam/variants', {
         method: 'POST',
         body: JSON.stringify({
-          baseExam: exam,
+          baseExam: currentExam,
           variantCodes: [101, 102, 103, 104]
         })
       });
-      if (res.variants) {
+      if (res && res.variants) {
         setVariants(res.variants);
         setSelectedVariantCode('101');
         setCurrentExam(res.variants[0]);
+        return;
       }
+      throw new Error(res?.error || "Không thể trộn mã đề từ máy chủ");
     } catch (e) {
-      alert("Lỗi khi trộn mã đề: " + e.message);
+      console.warn("Server API variants error, generating client variants fallback:", e);
+      const codes = ['101', '102', '103', '104'];
+      const clientVariants = codes.map(code => {
+        const clonedQs = (currentExam.questions || []).map(q => {
+          if (q.options && q.options.length > 0) {
+            const shuffledOpts = [...q.options].sort(() => Math.random() - 0.5);
+            const correctOpt = q.options.find(o => o.key === q.correctAnswer || o.id === q.correctAnswer || o.isCorrect);
+            const newKey = correctOpt ? (shuffledOpts.find(o => o.text === correctOpt.text)?.key || q.correctAnswer) : q.correctAnswer;
+            return { ...q, options: shuffledOpts, correctAnswer: newKey };
+          }
+          return { ...q };
+        });
+        return {
+          ...currentExam,
+          variantCode: code,
+          title: `${currentExam.title || 'ĐỀ KIỂM TRA'} - MÃ ĐỀ ${code}`,
+          questions: clonedQs
+        };
+      });
+      setVariants(clientVariants);
+      setSelectedVariantCode('101');
+      setCurrentExam(clientVariants[0]);
     }
   };
 
@@ -694,15 +745,15 @@ export default function ExamPreviewTabs({ exam, onBackToEdit }) {
             </div>
             <div className="p-3.5 bg-purple-50/60 border border-purple-200 rounded-xl text-xs space-y-2 text-slate-700">
               <p className="font-medium text-purple-950 italic">
-                * Học sinh bốc thăm đọc thành tiếng một đoạn văn/thơ từ bộ sách Tiếng Việt {currentExam.grade} (bộ sách Kết nối tri thức với cuộc sống) và trả lời câu hỏi đọc hiểu của thầy cô:
+                * Học sinh bốc thăm đọc thành tiếng một đoạn văn/thơ từ bộ sách Tiếng Việt {currentExam.grade} (bộ sách Chân trời sáng tạo) và trả lời câu hỏi đọc hiểu của thầy cô:
               </p>
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 font-medium">
                 {(currentExam.readingExam?.oralItems || [
-                  { title: "Bài 1: Điều kì diệu", bookVolume: "Tập 1", page: "Trang 10" },
-                  { title: "Bài 5: Vệt phấn trên mặt bàn", bookVolume: "Tập 1", page: "Trang 28" },
-                  { title: "Bài 11: Tiếng nói của cỏ cây", bookVolume: "Tập 1", page: "Trang 52" },
-                  { title: "Bài 18: Bầu trời mùa thu", bookVolume: "Tập 1", page: "Trang 84" },
-                  { title: "Bài 24: Người tìm đường lên các vì sao", bookVolume: "Tập 1", page: "Trang 112" }
+                  { title: "Bài 1: Tuổi Ngựa", bookVolume: "Tập 1", page: "Trang 10" },
+                  { title: "Bài 2: Trải nghiệm để lớn khôn", bookVolume: "Tập 1", page: "Trang 16" },
+                  { title: "Bài 3: Vệt nắng chiều thu", bookVolume: "Tập 1", page: "Trang 24" },
+                  { title: "Bài 4: Tiếng ru của mẹ", bookVolume: "Tập 1", page: "Trang 32" },
+                  { title: "Bài 5: Kì quan đại ngàn", bookVolume: "Tập 1", page: "Trang 40" }
                 ]).map((item, idx) => (
                   <div key={idx} className="p-2.5 bg-white rounded-lg border border-purple-200 shadow-2xs flex items-center justify-between">
                     <div>
@@ -977,7 +1028,7 @@ export default function ExamPreviewTabs({ exam, onBackToEdit }) {
                 Full name: ............................................................................
               </div>
               <div className="text-slate-700">
-                Class: <strong>{currentExam.grade}</strong>......   School year: 2025-2026
+                Class: <strong>{currentExam.grade}</strong>......   School year: 20... - 20...
               </div>
             </div>
 
@@ -1526,7 +1577,7 @@ export default function ExamPreviewTabs({ exam, onBackToEdit }) {
                 Full name: ............................................................................
               </div>
               <div className="text-slate-700">
-                Class: <strong>{currentExam.grade}</strong>......   School year: 2025-2026
+                Class: <strong>{currentExam.grade}</strong>......   School year: 20... - 20...
               </div>
             </div>
 
@@ -1953,7 +2004,7 @@ export default function ExamPreviewTabs({ exam, onBackToEdit }) {
                       <table className="w-full text-left text-xs">
                         <thead className="bg-purple-100/70 text-purple-950 font-bold">
                           <tr>
-                            <th className="p-2 border-r border-purple-200 w-2/5">Bài đọc tham khảo (SGK Kết nối tri thức - Chuẩn TT27)</th>
+                            <th className="p-2 border-r border-purple-200 w-2/5">Bài đọc tham khảo (SGK Chân trời sáng tạo - Chuẩn TT27)</th>
                             <th className="p-2 border-r border-purple-200 w-3/10">Câu hỏi giáo viên nêu cho HS</th>
                             <th className="p-2 bg-purple-50 text-purple-900 w-3/10">Gợi ý câu trả lời & Chấm điểm</th>
                           </tr>

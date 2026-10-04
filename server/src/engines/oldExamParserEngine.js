@@ -4,23 +4,13 @@
  */
 
 const mammoth = require('mammoth');
-
-let PDFParse = null;
-try {
-  if (typeof globalThis.DOMMatrix === 'undefined') {
-    globalThis.DOMMatrix = class DOMMatrix {};
-  }
-  const pdfParsePkg = require('pdf-parse');
-  PDFParse = pdfParsePkg.PDFParse || pdfParsePkg;
-} catch (e) {
-  console.warn('pdf-parse không khả dụng trên môi trường serverless, sẽ dùng Gemini Vision thay thế:', e.message);
-}
+const { PDFParse } = require('pdf-parse');
 
 // Khóa API Gemini mặc định để nhận diện Vision & LLM
 const DEFAULT_GEMINI_KEY = (function() {
   try {
-    const p1 = "QVEuQWI4Uk42SjdOZHVzZGtZNV9o";
-    const p2 = "TnB3NzRfLXJtWldpRUVraXpnMmdMaWNoQmdQaW51emc=";
+    const p1 = "QVEuQWI4Uk42S2JCdWc0WXBCM19j";
+    const p2 = "ZUVNaTItVHFaYURVSVd6R1MxWFk0Nlk0aHBkbkNKemc=";
     return Buffer.from(p1 + p2, 'base64').toString('utf8');
   } catch (e) {
     return "";
@@ -35,7 +25,7 @@ class OldExamParserEngine {
     const apiKey = options.apiKey || DEFAULT_GEMINI_KEY;
     if (!apiKey) throw new Error("Chưa cấu hình Gemini API Key");
 
-    const models = ["gemini-3.5-flash", "gemini-3.5-flash-lite", "gemini-2.5-flash", "gemini-1.5-flash"];
+    const models = ["gemini-2.5-flash", "gemini-1.5-flash"];
     let lastErr = null;
 
     for (const model of models) {
@@ -87,17 +77,15 @@ class OldExamParserEngine {
 
     // 2. Tệp PDF
     if (mimeType === 'application/pdf' || lowerName.endsWith('.pdf')) {
-      if (PDFParse) {
-        try {
-          const parser = new PDFParse({ data: new Uint8Array(buffer) });
-          const textObj = await parser.getText();
-          const text = typeof textObj === 'string' ? textObj : (textObj?.text || '');
-          if (text && text.trim().length > 30) {
-            return text;
-          }
-        } catch (err) {
-          console.warn("Lỗi đọc PDF bằng PDFParse, thử OCR qua Gemini Vision:", err.message);
+      try {
+        const parser = new PDFParse({ data: new Uint8Array(buffer) });
+        const textObj = await parser.getText();
+        const text = typeof textObj === 'string' ? textObj : (textObj?.text || '');
+        if (text && text.trim().length > 30) {
+          return text;
         }
+      } catch (err) {
+        console.warn("Lỗi đọc PDF bằng PDFParse, thử OCR qua Gemini Vision:", err.message);
       }
 
       // Fallback: OCR bằng Gemini Vision cho PDF quét/ảnh

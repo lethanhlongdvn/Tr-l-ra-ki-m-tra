@@ -50,11 +50,13 @@ class EnglishDocxEngine {
   /**
    * Giải quyết ảnh và trả về Buffer + format để tạo ImageRun
    */
-  resolveImageBuffer(item) {
+  resolveImageBuffer(item, grade = null) {
     if (!item) return null;
+    let targetGrade = grade || this.currentGrade;
     let raw = item;
     if (typeof item === 'object') {
       raw = item.image || item.imageKey || item.imageUrl || item.src;
+      if (!targetGrade) targetGrade = item.grade || this.currentGrade;
     }
     if (!raw || typeof raw !== 'string') return null;
     raw = raw.trim();
@@ -62,15 +64,20 @@ class EnglishDocxEngine {
     let b64 = '';
     if (raw.startsWith('data:image')) {
       b64 = raw;
-    } else if (englishImagesBase64[raw]) {
-      b64 = englishImagesBase64[raw];
     } else {
-      const normalized = '/' + raw.replace(/^(\.\/|\/|dist\/)+/, '');
-      if (englishImagesBase64[normalized]) {
-        b64 = englishImagesBase64[normalized];
-      } else {
-        const filename = raw.split('/').pop().split('\\').pop();
-        if (englishImagesBase64[filename]) {
+      const filename = raw.split('/').pop().split('\\').pop();
+      if (targetGrade) {
+        const gradeKey = `/images/english/grade${targetGrade}/${filename}`;
+        if (englishImagesBase64[gradeKey]) b64 = englishImagesBase64[gradeKey];
+      }
+      if (!b64 && englishImagesBase64[raw]) {
+        b64 = englishImagesBase64[raw];
+      }
+      if (!b64) {
+        const normalized = '/' + raw.replace(/^(\.\/|\/|dist\/)+/, '');
+        if (englishImagesBase64[normalized]) {
+          b64 = englishImagesBase64[normalized];
+        } else if (englishImagesBase64[filename]) {
           b64 = englishImagesBase64[filename];
         } else {
           const match = Object.keys(englishImagesBase64).find(k => k.endsWith('/' + filename));
@@ -95,8 +102,8 @@ class EnglishDocxEngine {
   /**
    * Tạo ImageRun nhúng an toàn
    */
-  createImageRun(item, maxWidth = 120, maxHeight = 85) {
-    const resolved = this.resolveImageBuffer(item);
+  createImageRun(item, maxWidth = 120, maxHeight = 85, grade = null) {
+    const resolved = this.resolveImageBuffer(item, grade);
     if (!resolved) return null;
     try {
       return new ImageRun({
@@ -390,9 +397,51 @@ class EnglishDocxEngine {
   }
 
   /**
+   * Bộ chuyển đổi dữ liệu thông minh: Chuyển mảng questions phẳng từ AI Gemini sang cấu trúc 4 kỹ năng parts
+   */
+  adaptExamForDocx(rawExam) {
+    if (!rawExam) return rawExam;
+    const exam = { ...rawExam };
+    if (exam.parts && (exam.parts.listening || exam.parts.reading || exam.parts.writing || exam.parts.speaking)) {
+      return exam;
+    }
+    const questions = exam.questions || [];
+    const parts = { listening: null, reading: null, writing: null, speaking: null };
+
+    const lisQs = questions.filter(q => (q.skill || '').toLowerCase().includes('listen') || (q.taskTitle || '').toLowerCase().includes('listen') || (q.section || '').toLowerCase().includes('listen'));
+    const readQs = questions.filter(q => (q.skill || '').toLowerCase().includes('read') || (q.taskTitle || '').toLowerCase().includes('read') || (q.section || '').toLowerCase().includes('read'));
+    const wriQs = questions.filter(q => (q.skill || '').toLowerCase().includes('write') || (q.taskTitle || '').toLowerCase().includes('write') || (q.section || '').toLowerCase().includes('write'));
+    const spkQs = questions.filter(q => (q.skill || '').toLowerCase().includes('speak') || (q.taskTitle || '').toLowerCase().includes('speak') || (q.section || '').toLowerCase().includes('speak'));
+
+    if (lisQs.length > 0) {
+      parts.listening = { title: "PART I. LISTENING", tasks: [{ taskNumber: 1, taskTitle: "Listen and complete", items: lisQs }] };
+    }
+    if (readQs.length > 0) {
+      parts.reading = { title: "PART II. READING", tasks: [{ taskNumber: 2, taskTitle: "Read and complete", items: readQs }] };
+    }
+    if (wriQs.length > 0) {
+      parts.writing = { title: "PART III. WRITING", tasks: [{ taskNumber: 3, taskTitle: "Write your answers", items: wriQs }] };
+    }
+    if (spkQs.length > 0) {
+      parts.speaking = { title: "PART IV. SPEAKING", tasks: [{ taskNumber: 4, taskTitle: "Speaking test", items: spkQs }] };
+    }
+
+    if (!parts.listening && !parts.reading && !parts.writing && !parts.speaking && questions.length > 0) {
+      const half = Math.ceil(questions.length / 2);
+      parts.reading = { title: "PART I. READING & WRITING", tasks: [{ taskNumber: 1, taskTitle: "Read and choose", items: questions.slice(0, half) }] };
+      parts.writing = { title: "PART II. WRITING & SPEAKING", tasks: [{ taskNumber: 2, taskTitle: "Write and answer", items: questions.slice(half) }] };
+    }
+
+    exam.parts = parts;
+    return exam;
+  }
+
+  /**
    * Tạo tệp Word (.docx) hoàn chỉnh cho môn Tiếng Anh
    */
-  async generateDocx(exam) {
+  async generateDocx(rawExam) {
+    const exam = this.adaptExamForDocx(rawExam);
+    this.currentGrade = exam.grade || 4;
     const schoolName = (exam.schoolName || 'A AN TRUONG PRIMARY SCHOOL').toUpperCase();
     const grade = exam.grade || 4;
     const title = (exam.title || `THE FIRST TERM TEST FOR GRADE ${grade}`).toUpperCase();
@@ -419,7 +468,7 @@ class EnglishDocxEngine {
               children: [
                 new Paragraph({ children: [new TextRun({ text: schoolName, bold: true, size: 26, font: 'Times New Roman' })] }),
                 new Paragraph({ spacing: { before: 80 }, children: [new TextRun({ text: 'Full name: ..............................................................', size: 24, font: 'Times New Roman' })] }),
-                new Paragraph({ spacing: { before: 40 }, children: [new TextRun({ text: `Class: ${grade}......       School year: 2025-2026`, size: 24, font: 'Times New Roman' })] })
+                new Paragraph({ spacing: { before: 40 }, children: [new TextRun({ text: `Class: ${grade}......       School year: ..................`, size: 24, font: 'Times New Roman' })] })
               ]
             }),
             new TableCell({
@@ -922,7 +971,7 @@ class EnglishDocxEngine {
       alignment: AlignmentType.CENTER,
       spacing: { after: 120 },
       children: [
-        new TextRun({ text: `School year: 2025 - 2026  •  Grade: ${grade}`, italics: true, size: 22, font: 'Times New Roman' })
+        new TextRun({ text: `School year: ..................  •  Grade: ${grade}`, italics: true, size: 22, font: 'Times New Roman' })
       ]
     }));
 
@@ -1035,7 +1084,8 @@ class EnglishDocxEngine {
     }
 
     // ==================== 8. MA TRẬN ĐỀ KIỂM TRA 2 TẦNG (TT27) ====================
-    if (exam.matrix?.matrixRows && exam.matrix.matrixRows.length > 0) {
+    const mRows = exam.matrix?.matrixRows || exam.matrix?.rows;
+    if (mRows && mRows.length > 0) {
       children.push(new Paragraph({
         pageBreakBefore: true,
         alignment: AlignmentType.CENTER,
@@ -1048,7 +1098,7 @@ class EnglishDocxEngine {
       }));
 
       const matrixTable = this.createDocx10ColMatrixTable({
-        rows: exam.matrix.matrixRows,
+        rows: mRows,
         summary: exam.matrix.summary,
         ratios: exam.skillsRatio,
         totalPoints: 10

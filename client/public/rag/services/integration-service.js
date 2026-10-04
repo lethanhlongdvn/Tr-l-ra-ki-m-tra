@@ -4634,9 +4634,23 @@ Trả về JSON thuần túy (mảng các bài dạy đã cập nhật):`;
    * Chuẩn hóa và làm sạch mã HTML trước khi đóng gói Word .docx
    */
   sanitizeHtmlForWordDocx: function(html) {
-    if (!html) return '';
+    var cleaned = String(html || '');
+    
+    // 0. Bỏ MHTML MIME boundary headers nếu nhận được chuỗi MHTML để word/content.html là HTML thuần
+    if (cleaned.indexOf('MIME-Version:') !== -1 || cleaned.indexOf('Content-Type: multipart/related') !== -1) {
+      var htmlStart = cleaned.search(/<html\b/i);
+      if (htmlStart !== -1) {
+        var htmlEnd = cleaned.search(/<\/html>/i);
+        if (htmlEnd !== -1) {
+          cleaned = cleaned.substring(htmlStart, htmlEnd + 7);
+        } else {
+          cleaned = cleaned.substring(htmlStart);
+        }
+      }
+    }
+
     // 1. Loại bỏ triệt để text-justify: inter-ideograph (ngăn Word giãn khoảng cách ký tự bất thường)
-    var cleaned = html.replace(/text-justify\s*:\s*inter-ideograph\s*;?/gi, '');
+    cleaned = cleaned.replace(/text-justify\s*:\s*inter-ideograph\s*;?/gi, '');
 
     // 2. Chuyển đổi các ngắt dòng mềm <br/> trong ô bảng (td, th) thành đoạn <p> chuẩn
     // Ngăn chặn 100% lỗi Word giãn cách từ ngữ dàn trải hai biên (lỗi căn chữ/giãn chữ khi có Shift+Enter)
@@ -4653,14 +4667,9 @@ Trả về JSON thuần túy (mảng các bài dạy đã cập nhật):`;
       return cellOpen + cellBody + closeTag;
     });
 
-    // 3. XỬ LÝ TRIỆT ĐỂ LỖI ẢNH: "The linked image cannot be displayed" TRONG MICROSOFT WORD
-    // Trong cơ sở dữ liệu số hóa, các ảnh assets/khbd_images/... không có tệp thực tế trên đĩa máy tính,
-    // đồng thời Microsoft Word không hỗ trợ data: URI (Base64) trong altChunk.
-    // Loại bỏ hoàn toàn các thẻ <img> unresolvable để file Word mở ra 100% sạch đẹp, không bị ô dấu X đỏ.
+    // 3. XỬ LÝ ẢNH: Giữ lại thẻ <img> của câu hỏi để đóng gói vào ZIP
     cleaned = cleaned.replace(/<p\b[^>]*>\s*<img\b[^>]*assets\/khbd_images[^>]*>\s*<\/p>/gi, '');
     cleaned = cleaned.replace(/<img\b[^>]*assets\/khbd_images[^>]*>/gi, '');
-    cleaned = cleaned.replace(/<p\b[^>]*>\s*<img\b[^>]*src=["'](?:data:image\/|blob:)[^"']*["'][^>]*>\s*<\/p>/gi, '');
-    cleaned = cleaned.replace(/<img\b[^>]*src=["'](?:data:image\/|blob:)[^"']*["'][^>]*>/gi, '');
     cleaned = cleaned.replace(/<p\b[^>]*>\s*<\/p>/gi, '');
 
     return cleaned;
@@ -4686,41 +4695,75 @@ Trả về JSON thuần túy (mảng các bài dạy đã cập nhật):`;
 
     if (jszipObj) {
       try {
-        // Làm sạch và khử triệt để toàn bộ ảnh không tồn tại (assets/khbd_images/...) và data URI không tương thích
+        // Step A: Trích xuất ảnh Base64 từ phần MHTML MIME boundaries trước khi loại bỏ header
+        var mhtmlImagesMap = new Map();
+        if (typeof docHtml === 'string' && docHtml.indexOf('Content-Location:') !== -1) {
+          var boundaryMatch = docHtml.match(/boundary=["']?([^"'\r\n]+)["']?/i);
+          if (boundaryMatch) {
+            var boundary = boundaryMatch[1];
+            var parts = docHtml.split('--' + boundary);
+            for (var p = 0; p < parts.length; p++) {
+              var part = parts[p];
+              var locMatch = part.match(/Content-Location:\s*([^\r\n]+)/i);
+              var encMatch = part.match(/Content-Transfer-Encoding:\s*([^\r\n]+)/i);
+              if (locMatch && encMatch && encMatch[1].trim().toLowerCase() === 'base64') {
+                var loc = locMatch[1].trim();
+                if (!loc.startsWith('file://')) {
+                  var headerEnd = part.search(/\r?\n\r?\n/);
+                  if (headerEnd !== -1) {
+                    var b64Data = part.substring(headerEnd).replace(/[\r\n\s]+/g, '').trim();
+                    if (b64Data.length > 50) {
+                      mhtmlImagesMap.set(loc, b64Data);
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+
+        // Step B: Chuyển đổi các ảnh inline data:image/... thành tên file chuẩn (ví dụ word_img_1.png) thay vì xóa
+        var inlineImagesMap = new Map();
+        var imgCounter = 0;
         if (typeof docHtml === 'string') {
+          docHtml = docHtml.replace(/<img\b([^>]*)src=["'](data:image\/[a-zA-Z0-9+.-]+;base64,([^"']+))["']([^>]*)>/gi, function(fullTag, beforeSrc, fullDataUri, b64Data, afterSrc) {
+            imgCounter++;
+            var isJpg = fullDataUri.includes('image/jpeg') || fullDataUri.includes('image/jpg');
+            var ext = isJpg ? '.jpg' : '.png';
+            var locationName = 'word_img_' + imgCounter + ext;
+            inlineImagesMap.set(locationName, b64Data.trim());
+            return '<img' + beforeSrc + 'src="' + locationName + '"' + afterSrc + '>';
+          });
+
+          // Xóa bỏ các placeholder ảnh rác không tồn tại (assets/khbd_images/...)
           docHtml = docHtml.replace(/<p\b[^>]*>\s*<img\b[^>]*assets\/khbd_images[^>]*>\s*<\/p>/gi, '');
           docHtml = docHtml.replace(/<img\b[^>]*assets\/khbd_images[^>]*>/gi, '');
-          docHtml = docHtml.replace(/<p\b[^>]*>\s*<img\b[^>]*src=["'](?:data:image\/|blob:)[^"']*["'][^>]*>\s*<\/p>/gi, '');
-          docHtml = docHtml.replace(/<img\b[^>]*src=["'](?:data:image\/|blob:)[^"']*["'][^>]*>/gi, '');
           docHtml = docHtml.replace(/<p\b[^>]*>\s*<\/p>/gi, '');
         }
 
-        // Tự động xử lý các ảnh còn lại (nếu có)
+        // Giải quyết an toàn các ảnh từ kho ảnh Base64 thay vì xóa bỏ
         if (typeof docHtml === 'string' && docHtml.indexOf('<img') !== -1) {
           try {
-            var imgRegex = /<img[^>]+src=["']([^"']+)["'][^>]*>/gi;
-            var match;
-            var urlsToFetch = [];
-            while ((match = imgRegex.exec(docHtml)) !== null) {
-              var url = match[1];
-              if (url && !url.startsWith('data:') && !url.includes('assets/khbd_images') && urlsToFetch.indexOf(url) === -1) {
-                urlsToFetch.push(url);
-              }
-            }
-            for (var u = 0; u < urlsToFetch.length; u++) {
-              var targetUrl = urlsToFetch[u];
-              try {
-                var response = await fetch(targetUrl);
-                if (!response.ok) {
-                  var badImgRegex = new RegExp('<img[^>]+src=["\']' + targetUrl.replace(/[.*+?^${}()|[\]\\]/g, '\\$&') + '["\'][^>]*>', 'gi');
-                  docHtml = docHtml.replace(badImgRegex, '');
+            var engImgs = (typeof englishImagesBase64 !== 'undefined') ? englishImagesBase64 : ((typeof window !== 'undefined' && window.englishImagesBase64) ? window.englishImagesBase64 : null);
+            if (engImgs) {
+              docHtml = docHtml.replace(/<img\b([^>]*)src=["']([^"']+)["']([^>]*)>/gi, function(m, before, src, after) {
+                if (!src || src.startsWith('data:') || src.startsWith('word')) return m;
+                var fn = src.split('/').pop().split('\\').pop();
+                var b64 = engImgs[src] || engImgs['/' + src.replace(/^(\.\/|\/)+/, '')] || engImgs[fn];
+                if (!b64) {
+                  var mk = Object.keys(engImgs).find(function(k) { return k.endsWith('/' + fn); });
+                  if (mk) b64 = engImgs[mk];
                 }
-              } catch(fetchErr) {
-                var badImgRegex = new RegExp('<img[^>]+src=["\']' + targetUrl.replace(/[.*+?^${}()|[\]\\]/g, '\\$&') + '["\'][^>]*>', 'gi');
-                docHtml = docHtml.replace(badImgRegex, '');
-              }
+                if (b64) {
+                  imgCounter++;
+                  var loc = 'word_img_' + imgCounter + '.png';
+                  inlineImagesMap.set(loc, b64.replace(/^data:image\/[a-zA-Z0-9+.-]+;base64,/, '').trim());
+                  return '<img' + before + 'src="' + loc + '"' + after + '>';
+                }
+                return m;
+              });
             }
-          } catch(imgErr) {}
+          } catch(imgResolveErr) {}
         }
 
         // Chuẩn hóa kích thước toàn bộ ảnh trong file Word xuất ra cho toàn bộ hệ thống
@@ -4762,6 +4805,9 @@ Trả về JSON thuần túy (mảng các bài dạy đã cập nhật):`;
           '  <Default Extension="rels" ContentType="application/vnd.openxmlformats-package.relationships+xml"/>\n' +
           '  <Default Extension="xml" ContentType="application/xml"/>\n' +
           '  <Default Extension="html" ContentType="text/html"/>\n' +
+          '  <Default Extension="png" ContentType="image/png"/>\n' +
+          '  <Default Extension="jpg" ContentType="image/jpeg"/>\n' +
+          '  <Default Extension="jpeg" ContentType="image/jpeg"/>\n' +
           '  <Override PartName="/word/document.xml" ContentType="application/vnd.openxmlformats-officedocument.wordprocessingml.document.main+xml"/>\n' +
           '  <Override PartName="/word/styles.xml" ContentType="application/vnd.openxmlformats-officedocument.wordprocessingml.styles+xml"/>\n' +
           '  <Override PartName="/word/fontTable.xml" ContentType="application/vnd.openxmlformats-officedocument.wordprocessingml.fontTable+xml"/>\n' +
@@ -4858,6 +4904,60 @@ Trả về JSON thuần túy (mảng các bài dạy đã cập nhật):`;
         var fullHtml = sanitizedHtml.includes('<meta charset=') ? sanitizedHtml : ('<!DOCTYPE html><html><head><meta charset="utf-8"></head><body>' + sanitizedHtml + '</body></html>');
         zip.file('word/content.html', '\ufeff' + fullHtml);
 
+        // 8. Đóng gói 100% tệp hình ảnh thực tế vào thư mục word/ trong file zip để MS Word hiển thị mượt mà
+        try {
+          var engImages = (typeof englishImagesBase64 !== 'undefined') ? englishImagesBase64 : ((typeof window !== 'undefined' && window.englishImagesBase64) ? window.englishImagesBase64 : null);
+          var imgSrcRegex = /<img[^>]+src=["']([^"']+)["']/gi;
+          var imgMatch;
+          var savedImages = {};
+          while ((imgMatch = imgSrcRegex.exec(fullHtml)) !== null) {
+            var imgSrc = imgMatch[1];
+            if (!imgSrc || savedImages[imgSrc]) continue;
+            savedImages[imgSrc] = true;
+
+            var cleanB64 = '';
+            if (inlineImagesMap.has(imgSrc)) {
+              cleanB64 = inlineImagesMap.get(imgSrc);
+            } else if (mhtmlImagesMap.has(imgSrc)) {
+              cleanB64 = mhtmlImagesMap.get(imgSrc);
+            } else if (imgSrc.startsWith('data:image')) {
+              cleanB64 = imgSrc.replace(/^data:image\/[a-zA-Z0-9+.-]+;base64,/, '').trim();
+            } else if (engImages) {
+              if (engImages[imgSrc]) {
+                cleanB64 = engImages[imgSrc];
+              } else {
+                var fName = imgSrc.split('/').pop().split('\\').pop();
+                var cleanFName = fName.replace(/^word_\d+_/, '');
+                if (engImages[fName]) {
+                  cleanB64 = engImages[fName];
+                } else if (engImages[cleanFName]) {
+                  cleanB64 = engImages[cleanFName];
+                } else {
+                  var mKey = Object.keys(engImages).find(function(k) {
+                    return k.endsWith('/' + fName) || k.endsWith('/' + cleanFName);
+                  });
+                  if (mKey) cleanB64 = engImages[mKey];
+                }
+              }
+            }
+
+            if (cleanB64) {
+              if (cleanB64.startsWith('data:image')) {
+                cleanB64 = cleanB64.replace(/^data:image\/[a-zA-Z0-9+.-]+;base64,/, '').trim();
+              }
+              var binaryString = (typeof window !== 'undefined' && window.atob) ? window.atob(cleanB64) : Buffer.from(cleanB64, 'base64').toString('binary');
+              var bytes = new Uint8Array(binaryString.length);
+              for (var i = 0; i < binaryString.length; i++) {
+                bytes[i] = binaryString.charCodeAt(i);
+              }
+              var zipPath = imgSrc.startsWith('word') ? ('word/' + imgSrc) : ('word/' + imgSrc.split('/').pop());
+              zip.file(zipPath, bytes.buffer);
+            }
+          }
+        } catch (imgSaveErr) {
+          console.warn('Lỗi lưu ảnh vào zip:', imgSaveErr);
+        }
+
         var genType = (typeof JSZip !== 'undefined' && JSZip.support && JSZip.support.blob) ? 'blob' : 'uint8array';
         var docxBlob = await zip.generateAsync({
           type: genType,
@@ -4883,16 +4983,33 @@ Trả về JSON thuần túy (mảng các bài dạy đã cập nhật):`;
   downloadWordBlob: async function(docHtml, filename) {
     if (typeof Blob === 'undefined') return { success: false, error: 'Blob not supported' };
 
-    var finalFilename = filename || 'KHBD.docx';
-    if (!finalFilename.toLowerCase().endsWith('.docx')) {
-      finalFilename = finalFilename.replace(/\.doc$/i, '') + '.docx';
-    }
+    var finalFilename = filename || 'Tai_Lieu.doc';
+    var isMhtml = typeof docHtml === 'string' && (docHtml.indexOf('MIME-Version:') !== -1 || docHtml.indexOf('Content-Type: multipart/related') !== -1);
 
-    var result = await this.createDocxBlobFromHtml(docHtml);
-    var blob = result.blob;
-
-    if (!finalFilename.toLowerCase().endsWith('.docx')) {
-      finalFilename += '.docx';
+    var blob, isDocx;
+    if (isMhtml) {
+      if (finalFilename.toLowerCase().endsWith('.docx')) {
+        finalFilename = finalFilename.slice(0, -5) + '.doc';
+      } else if (!finalFilename.toLowerCase().endsWith('.doc')) {
+        finalFilename += '.doc';
+      }
+      blob = new Blob(['\ufeff' + docHtml], { type: 'message/rfc822;charset=utf-8' });
+      isDocx = false;
+    } else {
+      var result = await this.createDocxBlobFromHtml(docHtml);
+      blob = result.blob;
+      isDocx = result.isDocx;
+      if (!isDocx) {
+        if (finalFilename.toLowerCase().endsWith('.docx')) {
+          finalFilename = finalFilename.slice(0, -5) + '.doc';
+        } else if (!finalFilename.toLowerCase().endsWith('.doc')) {
+          finalFilename += '.doc';
+        }
+      } else {
+        if (!finalFilename.toLowerCase().endsWith('.docx')) {
+          finalFilename = finalFilename.replace(/\.doc$/i, '') + '.docx';
+        }
+      }
     }
 
     // 1. Mở Hộp thoại Lưu File (Save As dialog) chuẩn Windows / Hệ điều hành thông qua File System Access API
@@ -4901,8 +5018,10 @@ Trả về JSON thuần túy (mảng các bài dạy đã cập nhật):`;
         var pickerOpts = {
           suggestedName: finalFilename,
           types: [{
-            description: 'Tài liệu Microsoft Word (.docx)',
-            accept: { 'application/vnd.openxmlformats-officedocument.wordprocessingml.document': ['.docx'] }
+            description: isDocx ? 'Tài liệu Microsoft Word (.docx)' : 'Tài liệu Microsoft Word (.doc)',
+            accept: isDocx 
+              ? { 'application/vnd.openxmlformats-officedocument.wordprocessingml.document': ['.docx'] }
+              : { 'application/msword': ['.doc'] }
           }]
         };
         var handle = await window.showSaveFilePicker(pickerOpts);

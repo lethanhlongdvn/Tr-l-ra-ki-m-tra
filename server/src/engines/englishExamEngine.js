@@ -143,6 +143,108 @@ const MULTI_SET_WRITING_TASKS = {
   ]
 };
 
+const MULTI_SET_READING_PASSAGES_TERM2 = {
+  1: {
+    passage: `Last weekend, Nam and his class visited an eco-farm in Vinh Long. The weather was (1) ____________ and warm. They saw many (2) ____________ like cows and ducks. Nam helped to (3) ____________ fresh oranges in the garden. In the afternoon, they (4) ____________ fun games together. It was a very (5) ____________ day for everyone.`,
+    wordBank: ["sunny", "animals", "pick", "played", "happy"],
+    answers: ["sunny", "animals", "pick", "played", "happy"],
+    levels: ["M1", "M1", "M2", "M2", "M3"]
+  },
+  2: {
+    passage: `My friend Linda lives in a big city in London. Life in the city is very (1) ____________ and crowded. She usually goes to school (2) ____________ bus. Opposite her house, there is a big (3) ____________ and a bakery. At weekends, she likes going to the park to (4) ____________ her bike. She hopes to visit the quiet (5) ____________ in Vietnam next year.`,
+    wordBank: ["busy", "by", "pharmacy", "ride", "countryside"],
+    answers: ["busy", "by", "pharmacy", "ride", "countryside"],
+    levels: ["M1", "M1", "M2", "M2", "M3"]
+  },
+  3: {
+    passage: `Mai An Tiem was a hard-working prince in Vietnamese legend. He lived on a desert (1) ____________ with his family. He planted watermelons and traded them (2) ____________ food and clothes. I think An Tiem is very (3) ____________ and brave. The story teaches us that hard work brings (4) ____________ and happiness. It is my favourite (5) ____________.`,
+    wordBank: ["island", "for", "clever", "success", "story"],
+    answers: ["island", "for", "clever", "success", "story"],
+    levels: ["M1", "M1", "M2", "M2", "M3"]
+  },
+  4: {
+    passage: `We should protect our environment to keep our earth green. At our school, we (1) ____________ the playground every afternoon. We (2) ____________ green trees and water the flowers. We also (3) ____________ water by turning off the taps. We shouldn't throw (4) ____________ into the river. Clean environment is good for our (5) ____________.`,
+    wordBank: ["clean", "plant", "save", "trash", "health"],
+    answers: ["clean", "plant", "save", "trash", "health"],
+    levels: ["M1", "M1", "M2", "M2", "M3"]
+  },
+  5: {
+    passage: `What will houses be like in the future? They will be (1) ____________ houses on the moon or under the ocean. They will have (2) ____________ panels to save energy. Helpful (3) ____________ will do the housework, wash dishes and cook meals. Children will (4) ____________ online with computer screens. Life in the future will be very (5) ____________.`,
+    wordBank: ["smart", "solar", "robots", "learn", "exciting"],
+    answers: ["smart", "solar", "robots", "learn", "exciting"],
+    levels: ["M1", "M1", "M2", "M2", "M3"]
+  },
+  6: {
+    passage: `Tra On floating market is a famous place of interest in Vinh Long. People go there (1) ____________ boat to buy and sell fresh fruits. You can find (2) ____________ oranges and rambutan on the river. The sellers are very (3) ____________ and welcoming. Many tourists come here to (4) ____________ photos. It is a wonderful (5) ____________ to visit.`,
+    wordBank: ["by", "pomelos", "friendly", "take", "place"],
+    answers: ["by", "pomelos", "friendly", "take", "place"],
+    levels: ["M1", "M1", "M2", "M2", "M3"]
+  },
+  7: {
+    passage: `When you ride a bike on the road, you should be (1) ____________. You shouldn't ride too (2) ____________ because you may fall off your bike. Always stop at red (3) ____________ lights. Don't play football on the (4) ____________. Safe habits keep us (5) ____________.`,
+    wordBank: ["careful", "fast", "traffic", "street", "healthy"],
+    answers: ["careful", "fast", "traffic", "street", "healthy"],
+    levels: ["M1", "M1", "M2", "M2", "M3"]
+  },
+  8: {
+    passage: `Yesterday, our class had a memorable outdoor camping trip. We set up (1) ____________ in the pine forest. In the evening, we built a (2) ____________ and sang songs. We danced (3) ____________ the fire until nine o'clock. The weather was cool and (4) ____________. We had a (5) ____________ time together.`,
+    wordBank: ["tents", "campfire", "around", "pleasant", "great"],
+    answers: ["tents", "campfire", "around", "pleasant", "great"],
+    levels: ["M1", "M1", "M2", "M2", "M3"]
+  }
+};
+
+const MULTI_SET_WRITING_TASKS_TERM2 = {
+  1: [
+    { text: "What is your favourite drink?", prompt: "your favourite / What is / drink / ?" },
+    { text: "What is the matter with you?", prompt: "the matter / What is / with you / ?" },
+    { text: "I would like to be a doctor in the future.", prompt: "would like / I / to be a doctor / in the future / ." },
+    { text: "What's the weather like in summer?", prompt: "weather / What is the / like in summer / ?" }
+  ],
+  2: [
+    { text: "What is life in the countryside like?", prompt: "is life / What / in the countryside / like / ?" },
+    { text: "How can I get to the railway station?", prompt: "can I get / How / to the railway station / ?" },
+    { text: "You should not ride your bike too fast.", prompt: "should not / You / ride your bike / too fast / ." },
+    { text: "What do you think of Mai An Tiem?", prompt: "do you think / What / of Mai An Tiem / ?" }
+  ],
+  3: [
+    { text: "Where is the pharmacy?", prompt: "pharmacy / Where is / the / ?" },
+    { text: "What story are you reading?", prompt: "story / What / are you / reading / ?" },
+    { text: "An Tiem is hard-working and clever.", prompt: "is An Tiem / hard-working / and / clever / ." },
+    { text: "We should use solar energy.", prompt: "should / We / solar energy / use / ." }
+  ],
+  4: [
+    { text: "How did you get to the floating market?", prompt: "did you / How / get to / the floating market / ?" },
+    { text: "We went by boat.", prompt: "went / We / by / boat / ." },
+    { text: "We bought fresh fruit on the river.", prompt: "fresh fruit / bought / We / on the river / ." },
+    { text: "The trip was wonderful.", prompt: "was / The trip / wonderful / ." }
+  ],
+  5: [
+    { text: "What will houses be like in the future?", prompt: "houses / What will / be like / in the future / ?" },
+    { text: "They will be smart houses on the moon.", prompt: "smart houses / They will be / on the moon / ." },
+    { text: "Will helpful robots do housework?", prompt: "helpful robots / do / Will / housework / ?" },
+    { text: "Yes, they will.", prompt: "yes / will / they / ." }
+  ],
+  6: [
+    { text: "How can we protect our environment?", prompt: "protect / How can we / our environment / ?" },
+    { text: "We can plant more trees.", prompt: "can / We / plant / more trees / ." },
+    { text: "We should save water and electricity.", prompt: "save / We should / water and electricity / ." },
+    { text: "Don't throw trash into the river.", prompt: "throw trash / Don't / into the river / ." }
+  ],
+  7: [
+    { text: "What's your favourite drink?", prompt: "favourite / What's / drink / your / ?" },
+    { text: "I'd like some lemonade.", prompt: "lemonade / I'd like / some / ." },
+    { text: "What's the matter with him?", prompt: "matter / What's the / with him / ?" },
+    { text: "He has a fever.", prompt: "has / He / a fever / ." }
+  ],
+  8: [
+    { text: "Where were you yesterday?", prompt: "were you / Where / yesterday / ?" },
+    { text: "I was at the eco-farm.", prompt: "at / I was / the eco-farm / ." },
+    { text: "What did you do there?", prompt: "did you / What / do / there / ?" },
+    { text: "We picked fresh oranges.", prompt: "picked / We / fresh oranges / ." }
+  ]
+};
+
 class EnglishExamEngine {
   /**
    * Sinh đề thi môn Tiếng Anh chuẩn Thông tư 27 và SGK Global Success
@@ -174,20 +276,35 @@ class EnglishExamEngine {
 
     // Thay thế bài đọc hiểu theo Bộ đề (Set 1..8)
     if (readingData && readingData.length >= 2) {
-      const customPassage = MULTI_SET_READING_PASSAGES[setIdx] || MULTI_SET_READING_PASSAGES[1];
-      readingData = [
-        readingData[0],
-        {
-          ...readingData[1],
-          passage: customPassage.passage,
-          items: customPassage.items
-        }
-      ];
+      if (isSem2) {
+        const customPassage = MULTI_SET_READING_PASSAGES_TERM2[setIdx] || MULTI_SET_READING_PASSAGES_TERM2[1];
+        readingData = [
+          readingData[0],
+          {
+            ...readingData[1],
+            passage: customPassage.passage,
+            wordBank: customPassage.wordBank,
+            answers: customPassage.answers,
+            levels: customPassage.levels
+          }
+        ];
+      } else {
+        const customPassage = MULTI_SET_READING_PASSAGES[setIdx] || MULTI_SET_READING_PASSAGES[1];
+        readingData = [
+          readingData[0],
+          {
+            ...readingData[1],
+            passage: customPassage.passage,
+            items: customPassage.items
+          }
+        ];
+      }
     }
 
     // Thay thế câu viết sắp xếp từ theo Bộ đề (Set 1..8)
     if (writingData && writingData.length >= 2) {
-      const customSentences = MULTI_SET_WRITING_TASKS[setIdx] || MULTI_SET_WRITING_TASKS[1];
+      const writingDict = isSem2 ? MULTI_SET_WRITING_TASKS_TERM2 : MULTI_SET_WRITING_TASKS;
+      const customSentences = writingDict[setIdx] || writingDict[1];
       writingData = [
         writingData[0],
         {
