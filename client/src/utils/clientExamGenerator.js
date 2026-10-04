@@ -668,6 +668,108 @@ export function generateClientSideExam(params) {
     rawQuestions = rawTechQuestions;
   }
 
+  const semStr = String(semester || '').toLowerCase();
+  const isSem2 = semStr.includes('ii') || semStr.includes('2') || semStr.includes('cuối năm');
+  const isMid = semStr.includes('giữa') || semStr.includes('mid');
+  const termName = isSem2 ? (isMid ? 'SECOND MID-TERM' : 'SECOND TERM') : (isMid ? 'FIRST MID-TERM' : 'FIRST TERM');
+
+  const parts = isEnglish ? generateClientEnglishParts(grade, examSetIndex, semester) : null;
+  const teacherGuide = isEnglish ? generateClientEnglishTeacherGuide(grade, examSetIndex, semester) : null;
+
+  if (isEnglish && parts) {
+    const engItems = [];
+    // Listening tasks
+    (parts.listening?.tasks || []).forEach(t => {
+      (t.items || []).forEach((it, iIdx) => {
+        let correctAns = it.correct || it.orderIndex || it.answer || '';
+        if (typeof correctAns === 'number') correctAns = `Picture ${it.label?.split(' ')[1] || correctAns}`;
+        engItems.push({
+          itemNumber: engItems.length + 1,
+          questionNumber: engItems.length + 1,
+          skill: "Listening",
+          taskTitle: t.taskTitle,
+          topic: `Listening: ${t.taskTitle}`,
+          questionText: it.question || it.statement || it.label || `Listening Item ${iIdx + 1}`,
+          correctAnswer: String(correctAns || 'Đáp án theo file nghe'),
+          points: Number((t.points / (t.items?.length || 4)).toFixed(2)),
+          level: "M1",
+          questionType: "listening"
+        });
+      });
+    });
+
+    // Reading tasks
+    (parts.reading?.tasks || []).forEach((t, tIdx) => {
+      (t.items || []).forEach((it, iIdx) => {
+        engItems.push({
+          itemNumber: engItems.length + 1,
+          questionNumber: engItems.length + 1,
+          skill: "Reading",
+          taskTitle: t.taskTitle,
+          topic: `Reading: ${t.taskTitle}`,
+          questionText: it.statement || it.sentence || `Reading Item ${iIdx + 1}`,
+          correctAnswer: String(it.correct || it.answer || (t.answers && t.answers[it.id]) || 'A'),
+          points: Number((t.points / (t.items?.length || 5)).toFixed(2)),
+          level: tIdx === 0 ? "M1" : "M2",
+          questionType: "reading"
+        });
+      });
+    });
+
+    // Writing tasks
+    (parts.writing?.tasks || []).forEach((t, tIdx) => {
+      const wItems = (t.items && t.items.length > 0)
+        ? t.items
+        : (t.sentences || []).map((s, idx) => ({ jumbled: s, questionText: s, answer: t.answers?.[idx] }));
+      wItems.forEach((it, iIdx) => {
+        engItems.push({
+          itemNumber: engItems.length + 1,
+          questionNumber: engItems.length + 1,
+          skill: "Writing",
+          taskTitle: t.taskTitle,
+          topic: `Writing: ${t.taskTitle}`,
+          questionText: it.jumbled || it.clue || it.questionText || `Writing Item ${iIdx + 1}`,
+          correctAnswer: String(it.word || it.answer || (t.answers && t.answers[iIdx]) || ''),
+          points: Number((t.points / (wItems.length || 5)).toFixed(2)),
+          level: tIdx === 0 ? "M2" : "M3",
+          questionType: "writing"
+        });
+      });
+    });
+
+    // Speaking
+    if (parts.speaking) {
+      engItems.push({
+        itemNumber: engItems.length + 1,
+        questionNumber: engItems.length + 1,
+        skill: "Speaking",
+        taskTitle: "Part 1: Personal questions",
+        topic: "Speaking: Interview",
+        questionText: "Get to know each other and answer personal questions",
+        correctAnswer: "Trả lời trôi chảy, đúng trọng tâm và phát âm chuẩn",
+        points: 1.0,
+        level: "M2",
+        questionType: "constructed_response"
+      });
+      engItems.push({
+        itemNumber: engItems.length + 1,
+        questionNumber: engItems.length + 1,
+        skill: "Speaking",
+        taskTitle: "Part 2: Look and answer",
+        topic: "Speaking: Situational questions",
+        questionText: "Look at situational pictures and answer questions",
+        correctAnswer: "Trả lời chính xác theo tình huống tranh minh họa",
+        points: 1.0,
+        level: "M3",
+        questionType: "constructed_response"
+      });
+    }
+
+    if (engItems.length > 0) {
+      rawQuestions = engItems;
+    }
+  }
+
   const questions = rawQuestions.map((q, idx) => ({
     ...q,
     itemNumber: idx + 1,
@@ -690,14 +792,6 @@ export function generateClientSideExam(params) {
 
   const mcCount = questions.filter(q => q.questionType === 'multiple_choice' || q.questionType === 'true_false' || q.questionType === 'fill_in_the_blank' || q.questionType === 'matching').length;
   const crCount = questions.filter(q => q.questionType === 'constructed_response').length;
-
-  const semStr = String(semester || '').toLowerCase();
-  const isSem2 = semStr.includes('ii') || semStr.includes('2') || semStr.includes('cuối năm');
-  const isMid = semStr.includes('giữa') || semStr.includes('mid');
-  const termName = isSem2 ? (isMid ? 'SECOND MID-TERM' : 'SECOND TERM') : (isMid ? 'FIRST MID-TERM' : 'FIRST TERM');
-
-  const parts = isEnglish ? generateClientEnglishParts(grade, examSetIndex, semester) : null;
-  const teacherGuide = isEnglish ? generateClientEnglishTeacherGuide(grade, examSetIndex, semester) : null;
 
   return {
     examId: `EXAM-${Date.now()}`,
@@ -1092,12 +1186,18 @@ function generateClientEnglishParts(grade = 4, setIdx = 1, semester = 'Cuối h�
         tasks: [
           {
             taskNumber: 1, taskTitle: "Look and tick ☑ or cross 🗵", taskDesc: "Look at the pictures and write ☑ or 🗵.", points: 1.25,
-            items: [
-              { id: "G5-R1-1", statement: "They are playing table tennis / watering flowers.", image: "/images/english/grade5/image13.png", imageKey: "image13.png", correct: "☑" },
-              { id: "G5-R1-2", statement: "She wants to be a doctor / pharmacy.", image: "/images/english/grade5/image14.png", imageKey: "image14.png", correct: "🗵" },
-              { id: "G5-R1-3", statement: "The library / environmental protection.", image: "/images/english/grade5/image15.png", imageKey: "image15.png", correct: "☑" },
-              { id: "G5-R1-4", statement: "They are dancing / planting trees.", image: "/images/english/grade5/image16.png", imageKey: "image16.png", correct: "☑" },
-              { id: "G5-R1-5", statement: "He was at the zoo yesterday.", image: "/images/english/grade5/image17.png", imageKey: "image17.png", correct: "🗵" }
+            items: isSem2 ? [
+              { id: "G5-R1-T2-1", statement: "go by bus", caption: "go by bus", image: "/images/english/grade5/image13.png", imageKey: "image13.png", correct: "☑" },
+              { id: "G5-R1-T2-2", statement: "pharmacy", caption: "pharmacy", image: "/images/english/grade5/image14.png", imageKey: "image14.png", correct: "🗵" },
+              { id: "G5-R1-T2-3", statement: "hard-working", caption: "hard-working", image: "/images/english/grade5/image15.png", imageKey: "image15.png", correct: "☑" },
+              { id: "G5-R1-T2-4", statement: "protect the environment", caption: "protect the environment", image: "/images/english/grade5/image16.png", imageKey: "image16.png", correct: "☑" },
+              { id: "G5-R1-T2-5", statement: "smart house", caption: "smart house", image: "/images/english/grade5/image17.png", imageKey: "image17.png", correct: "🗵" }
+            ] : [
+              { id: "G5-R1-1", statement: "water the flowers", caption: "water the flowers", image: "/images/english/grade5/image13.png", imageKey: "image13.png", correct: "☑" },
+              { id: "G5-R1-2", statement: "flat", caption: "flat", image: "/images/english/grade5/image14.png", imageKey: "image14.png", correct: "🗵" },
+              { id: "G5-R1-3", statement: "table tennis", caption: "table tennis", image: "/images/english/grade5/image15.png", imageKey: "image15.png", correct: "☑" },
+              { id: "G5-R1-4", statement: "gardener", caption: "gardener", image: "/images/english/grade5/image16.png", imageKey: "image16.png", correct: "🗵" },
+              { id: "G5-R1-5", statement: "American", caption: "American", image: "/images/english/grade5/image17.png", imageKey: "image17.png", correct: "☑" }
             ]
           },
           {
@@ -1129,7 +1229,13 @@ function generateClientEnglishParts(grade = 4, setIdx = 1, semester = 'Cuối h�
           {
             taskNumber: 2, taskTitle: "Make sentences", taskDesc: "Reorder words to make correct sentences.", points: 1.5,
             sentences: currentWritingTask.sentences,
-            answers: currentWritingTask.answers
+            answers: currentWritingTask.answers,
+            items: (currentWritingTask.sentences || []).map((s, idx) => ({
+              id: `G5-W2-${idx + 1}`,
+              jumbled: s,
+              questionText: s,
+              answer: currentWritingTask.answers?.[idx] || ''
+            }))
           }
         ]
       },
@@ -1207,12 +1313,18 @@ function generateClientEnglishParts(grade = 4, setIdx = 1, semester = 'Cuối h�
       tasks: [
         {
           taskNumber: 1, taskTitle: "Look and tick (☑) or cross (🗵)", taskDesc: "Look at pictures and write ☑ or 🗵.", points: 1.25,
-          items: [
-            { id: "G4-R1-1", statement: "I can ride a bike / sore throat.", image: "/images/english/grade4/image13.png", imageKey: "image13.png", correct: "☑" },
-            { id: "G4-R1-2", statement: "She has Art / lemonade.", image: "/images/english/grade4/image14.png", imageKey: "image14.png", correct: "🗵" },
+          items: isSem2 ? [
+            { id: "G4-R1-T2-1", statement: "He has a sore throat.", image: "/images/english/grade4/image13.png", imageKey: "image13.png", correct: "☑" },
+            { id: "G4-R1-T2-2", statement: "My favourite drink is lemonade.", image: "/images/english/grade4/image14.png", imageKey: "image14.png", correct: "🗵" },
+            { id: "G4-R1-T2-3", statement: "Our school is in the mountains.", image: "/images/english/grade4/image15.png", imageKey: "image15.png", correct: "☑" },
+            { id: "G4-R1-T2-4", statement: "They are picking apples at the farm.", image: "/images/english/grade4/image16.png", imageKey: "image16.png", correct: "☑" },
+            { id: "G4-R1-T2-5", statement: "She wants to be a pilot.", image: "/images/english/grade4/image17.png", imageKey: "image17.png", correct: "🗵" }
+          ] : [
+            { id: "G4-R1-1", statement: "I can ride a bike.", image: "/images/english/grade4/image13.png", imageKey: "image13.png", correct: "☑" },
+            { id: "G4-R1-2", statement: "She has Art on Wednesdays.", image: "/images/english/grade4/image14.png", imageKey: "image14.png", correct: "🗵" },
             { id: "G4-R1-3", statement: "Our school is in the village.", image: "/images/english/grade4/image15.png", imageKey: "image15.png", correct: "☑" },
-            { id: "G4-R1-4", statement: "I go to bed / picking apples.", image: "/images/english/grade4/image16.png", imageKey: "image16.png", correct: "☑" },
-            { id: "G4-R1-5", statement: "His birthday / pilot.", image: "/images/english/grade4/image17.png", imageKey: "image17.png", correct: "🗵" }
+            { id: "G4-R1-4", statement: "I go to bed at nine o'clock.", image: "/images/english/grade4/image16.png", imageKey: "image16.png", correct: "☑" },
+            { id: "G4-R1-5", statement: "His birthday is in November.", image: "/images/english/grade4/image17.png", imageKey: "image17.png", correct: "🗵" }
           ]
         },
         {
@@ -1255,7 +1367,13 @@ function generateClientEnglishParts(grade = 4, setIdx = 1, semester = 'Cuối h�
         {
           taskNumber: 2, taskTitle: "Reorder the words to make correct sentences", taskDesc: "Put words in correct order.", points: 1.25,
           sentences: currentWritingTask.sentences,
-          answers: currentWritingTask.answers
+          answers: currentWritingTask.answers,
+          items: (currentWritingTask.sentences || []).map((s, idx) => ({
+            id: `G4-W2-${idx + 1}`,
+            jumbled: s,
+            questionText: s,
+            answer: currentWritingTask.answers?.[idx] || ''
+          }))
         }
       ]
     },

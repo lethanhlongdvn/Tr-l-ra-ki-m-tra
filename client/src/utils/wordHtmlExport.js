@@ -788,7 +788,13 @@ export function buildStandardExamHtml(exam, { forPdf = false, isPrint = false } 
         }
 
         // TASK: Make sentences / Reorder words (2 cột)
-        const items = t.items || [];
+        const items = (t.items && t.items.length > 0)
+          ? t.items
+          : (t.sentences || []).map((s, idx) => ({
+              jumbled: s,
+              questionText: s,
+              answer: t.answers?.[idx] || ''
+            }));
         const half = Math.ceil(items.length / 2);
         return `
           <div style="margin-bottom: 14px; margin-left: 8px;">
@@ -1092,7 +1098,13 @@ export function buildStandardExamHtml(exam, { forPdf = false, isPrint = false } 
         `;
       }
 
-      const items = t.items || [];
+      const items = (t.items && t.items.length > 0)
+        ? t.items
+        : (t.sentences || []).map((s, idx) => ({
+            jumbled: s,
+            questionText: s,
+            answer: t.answers?.[idx] || ''
+          }));
       const half = Math.ceil(items.length / 2);
       return `
         <div style="margin-bottom: 10px;">
@@ -1165,7 +1177,7 @@ export function buildStandardExamHtml(exam, { forPdf = false, isPrint = false } 
         ${questions.map((q, idx) => `
           <tr>
             <td style="border: 1px solid #000; padding: 4px; text-align: center;">${idx + 1}</td>
-            <td style="border: 1px solid #000; padding: 4px;">${q.skill} (${q.taskTitle || ''})</td>
+            <td style="border: 1px solid #000; padding: 4px;">${q.skill || 'English'} (${q.taskTitle || q.topic || ''})</td>
             <td style="border: 1px solid #000; padding: 4px; font-weight: bold; color: #047857;">${q.correctAnswer}</td>
             <td style="border: 1px solid #000; padding: 4px; text-align: center;">${q.points}</td>
             <td style="border: 1px solid #000; padding: 4px; text-align: center;">${q.level}</td>
