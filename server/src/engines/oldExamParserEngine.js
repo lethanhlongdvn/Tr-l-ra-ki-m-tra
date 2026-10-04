@@ -4,7 +4,33 @@
  */
 
 const mammoth = require('mammoth');
-const { PDFParse } = require('pdf-parse');
+
+function getPdfParserClass() {
+  if (typeof globalThis.DOMMatrix === 'undefined') {
+    globalThis.DOMMatrix = class DOMMatrix {
+      constructor() {
+        this.a = 1; this.b = 0; this.c = 0; this.d = 1; this.e = 0; this.f = 0;
+        this.m11 = 1; this.m12 = 0; this.m13 = 0; this.m14 = 0;
+        this.m21 = 0; this.m22 = 1; this.m23 = 0; this.m24 = 0;
+        this.m31 = 0; this.m32 = 0; this.m33 = 1; this.m34 = 0;
+        this.m41 = 0; this.m42 = 0; this.m43 = 0; this.m44 = 1;
+        this.is2D = true; this.isIdentity = true;
+      }
+      inverse() { return this; }
+      multiply() { return this; }
+      translate() { return this; }
+      scale() { return this; }
+      rotate() { return this; }
+    };
+  }
+  try {
+    const pkg = require('pdf-parse');
+    return pkg.PDFParse || pkg;
+  } catch (e) {
+    console.warn("Lỗi nạp pdf-parse:", e.message);
+    return null;
+  }
+}
 
 // Khóa API Gemini mặc định để nhận diện Vision & LLM
 const DEFAULT_GEMINI_KEY = (function() {
@@ -78,11 +104,14 @@ class OldExamParserEngine {
     // 2. Tệp PDF
     if (mimeType === 'application/pdf' || lowerName.endsWith('.pdf')) {
       try {
-        const parser = new PDFParse({ data: new Uint8Array(buffer) });
-        const textObj = await parser.getText();
-        const text = typeof textObj === 'string' ? textObj : (textObj?.text || '');
-        if (text && text.trim().length > 30) {
-          return text;
+        const PDFParserClass = getPdfParserClass();
+        if (PDFParserClass) {
+          const parser = new PDFParserClass({ data: new Uint8Array(buffer) });
+          const textObj = await parser.getText();
+          const text = typeof textObj === 'string' ? textObj : (textObj?.text || '');
+          if (text && text.trim().length > 30) {
+            return text;
+          }
         }
       } catch (err) {
         console.warn("Lỗi đọc PDF bằng PDFParse, thử OCR qua Gemini Vision:", err.message);

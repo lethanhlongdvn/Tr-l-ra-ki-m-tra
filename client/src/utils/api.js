@@ -46,7 +46,7 @@ export async function downloadFile(endpoint, body, filename) {
   }
 
   const blob = await response.blob();
-  if (blob.size < 15000 && filename.toLowerCase().endsWith('.docx')) {
+  if (blob.size < 500 && filename.toLowerCase().endsWith('.docx')) {
     throw new Error("Tệp nhận được không hợp lệ, chuyển sang tạo trực tiếp.");
   }
 
